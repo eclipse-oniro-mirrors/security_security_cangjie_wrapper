@@ -24,12 +24,12 @@ import ohos.labels.APILevel
  * Signature verification class, defining methods for verifying signatures using a public key.
  */
 @!APILevel[
-    since: "26.0.1",
+    since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Signature"
 ]
 public class Verify {
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature"
     ]
     public prop algName: String {
@@ -37,7 +37,7 @@ public class Verify {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature",
         throwexception: true
     ]
@@ -46,7 +46,7 @@ public class Verify {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature",
         throwexception: true
     ]
@@ -55,7 +55,7 @@ public class Verify {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature",
         throwexception: true
     ]
@@ -64,7 +64,7 @@ public class Verify {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature",
         throwexception: true
     ]
@@ -73,7 +73,7 @@ public class Verify {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature",
         throwexception: true
     ]
@@ -82,7 +82,7 @@ public class Verify {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature",
         throwexception: true
     ]
@@ -91,7 +91,7 @@ public class Verify {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature",
         throwexception: true
     ]
@@ -100,7 +100,7 @@ public class Verify {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature",
         throwexception: true
     ]
@@ -117,7 +117,7 @@ public class Verify {
  * Creates a Verify instance.
  */
 @!APILevel[
-    since: "26.0.1",
+    since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Signature",
     throwexception: true
 ]

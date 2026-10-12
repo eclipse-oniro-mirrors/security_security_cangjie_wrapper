@@ -24,30 +24,40 @@ import ohos.labels.APILevel
  * Encapsulates the parameters used for encrypting private keys.
  */
 @!APILevel[
-    since: "26.0.1",
+    since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
 ]
 public class KeyEncodingConfig {
-    @!APILevel[
-        since: "26.0.1",
-        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
-    ]
-    public var password: String
+    private var _password: String = String()
+
+    private var _cipherName: String = String()
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
     ]
-    public var cipherName: String
+    public mut prop password: String {
+        get() { return _password }
+        set(v) { _password = v }
+    }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
+    ]
+    public mut prop cipherName: String {
+        get() { return _cipherName }
+        set(v) { _cipherName = v }
+    }
+
+    @!APILevel[
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
     ]
     public init() {
         super()
-        password = String()
-        cipherName = String()
+        _password = String()
+        _cipherName = String()
     }
 }
 
@@ -55,12 +65,12 @@ public class KeyEncodingConfig {
  * Provides APIs for private key operations. PriKey is a child class of Key.
  */
 @!APILevel[
-    since: "26.0.1",
+    since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
 ]
 public class PriKey <: Key {
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key"
     ]
     public prop format: String {
@@ -68,7 +78,7 @@ public class PriKey <: Key {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key"
     ]
     public prop algName: String {
@@ -76,7 +86,7 @@ public class PriKey <: Key {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
     ]
     public func clearMem(): Unit {
@@ -84,7 +94,7 @@ public class PriKey <: Key {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
         throwexception: true
     ]
@@ -93,7 +103,7 @@ public class PriKey <: Key {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
         throwexception: true
     ]
@@ -102,7 +112,7 @@ public class PriKey <: Key {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
         throwexception: true
     ]
@@ -111,7 +121,7 @@ public class PriKey <: Key {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
         throwexception: true
     ]
@@ -120,7 +130,7 @@ public class PriKey <: Key {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key",
         throwexception: true
     ]
@@ -137,12 +147,12 @@ public class PriKey <: Key {
  * Provides APIs for public key operations. PubKey is a child class of Key.
  */
 @!APILevel[
-    since: "26.0.1",
+    since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
 ]
 public class PubKey <: Key {
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key"
     ]
     public prop format: String {
@@ -150,7 +160,7 @@ public class PubKey <: Key {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key"
     ]
     public prop algName: String {
@@ -158,7 +168,7 @@ public class PubKey <: Key {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
         throwexception: true
     ]
@@ -167,7 +177,7 @@ public class PubKey <: Key {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
         throwexception: true
     ]
@@ -176,7 +186,7 @@ public class PubKey <: Key {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
         throwexception: true
     ]
@@ -185,7 +195,7 @@ public class PubKey <: Key {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key",
         throwexception: true
     ]
@@ -202,12 +212,12 @@ public class PubKey <: Key {
  * Defines an asymmetric key pair, which includes a public key and a private key.
  */
 @!APILevel[
-    since: "26.0.1",
+    since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
 ]
 public class KeyPair {
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
     ]
     public prop priKey: PriKey {
@@ -215,7 +225,7 @@ public class KeyPair {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
     ]
     public prop pubKey: PubKey {
@@ -231,12 +241,12 @@ public class KeyPair {
  * Asymmetric key generator class, defining methods for generating asymmetric keys.
  */
 @!APILevel[
-    since: "26.0.1",
+    since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
 ]
 public class AsyKeyGenerator {
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
     ]
     public prop algName: String {
@@ -244,7 +254,7 @@ public class AsyKeyGenerator {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
         throwexception: true
     ]
@@ -253,7 +263,7 @@ public class AsyKeyGenerator {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
         throwexception: true
     ]
@@ -262,7 +272,7 @@ public class AsyKeyGenerator {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
         throwexception: true
     ]
@@ -271,7 +281,7 @@ public class AsyKeyGenerator {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
         throwexception: true
     ]
@@ -280,7 +290,7 @@ public class AsyKeyGenerator {
     }
 
     @!APILevel[
-        since: "26.0.1",
+        since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
         throwexception: true
     ]
@@ -297,7 +307,7 @@ public class AsyKeyGenerator {
  * Creates an AsyKeyGenerator instance based on the specified algorithm.
  */
 @!APILevel[
-    since: "26.0.1",
+    since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
     throwexception: true
 ]
