@@ -21,6 +21,8 @@ ohos_cangjie_shared_library("ohos.security.crypto_framework") {
     sources = [ "../../../mock/ohos.security.crypto_framework.cj" ]
   } else {
     sources = [
+      "asy_key.cj",
+      "asy_key_spec.cj",
       "cipher.cj",
       "cj_crypto_common.cj",
       "cj_crypto_enum.cj",
@@ -32,6 +34,7 @@ ohos_cangjie_shared_library("ohos.security.crypto_framework") {
       "random.cj",
       "sym_key.cj",
       "sym_key_generator.cj",
+      "verify.cj",
     ]
   }
 
