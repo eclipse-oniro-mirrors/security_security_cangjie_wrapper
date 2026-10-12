@@ -17,6 +17,7 @@
 
 package ohos.security.crypto_framework
 
+import ohos.business_exception.AsyncCallback
 import ohos.labels.APILevel
 
 /**
@@ -31,13 +32,13 @@ public class KeyEncodingConfig {
         since: "26.0.1",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
     ]
-    public mut prop password: String
+    public var password: String
 
     @!APILevel[
         since: "26.0.1",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
     ]
-    public mut prop cipherName: String
+    public var cipherName: String
 
     @!APILevel[
         since: "26.0.1",

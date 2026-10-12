@@ -17,6 +17,7 @@
 
 package ohos.security.crypto_framework
 
+import ohos.business_exception.AsyncCallback
 import ohos.labels.APILevel
 
 /**

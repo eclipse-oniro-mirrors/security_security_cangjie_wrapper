@@ -18,6 +18,7 @@
 package ohos.security.crypto_framework
 
 import ohos.labels.APILevel
+import std.math.numeric.BigInt
 
 /**
  * Enum for signing and signature verification parameters, which can be set by using setSignSpec and setVerifySpec,
