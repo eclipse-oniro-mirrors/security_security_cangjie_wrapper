@@ -89,7 +89,7 @@ public func initSession(keyAlias: String, options: HuksOptions): HuksSessionHand
             throw hksCodeToException(retCode)
         }
     } finally {
-        paramSet.clear()
+        let _ = paramSet
         unsafe {
             LibC.free(keyAliasCstr)
             handle.free()
@@ -247,7 +247,7 @@ func updateOrFinishSession(params: SessionParams, properties: Array<HuksParam>,
         }
         processRet(retCode, coutBlob, handleBlob)
     } finally {
-        paramSet.clear()
+        let _ = paramSet
     }
 }
 
@@ -314,7 +314,7 @@ public func abortSession(handle: HuksHandleId, options: HuksOptions): Unit {
             throw hksCodeToException(retCode)
         }
     } finally {
-        paramSet.clear()
+        let _ = paramSet
         unsafe {
             handleBlob.free()
         }
