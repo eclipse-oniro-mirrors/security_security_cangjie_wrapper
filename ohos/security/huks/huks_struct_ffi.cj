@@ -18,6 +18,8 @@
 package ohos.security.huks
 
 import std.collection.ArrayList
+import std.collection.concurrent.ConcurrentHashMap
+import std.sync.AtomicInt64
 import ohos.business_exception.BusinessException
 
 @C
@@ -113,17 +115,28 @@ const HKS_TAG_TYPE_ULONG: UInt32 = 3 << 28
 const HKS_TAG_TYPE_BOOL: UInt32 = 4 << 28
 const HKS_TAG_TYPE_BYTES: UInt32 = 5 << 28
 
+// Package-level GC roots used to pin param sets during native FFI calls.
+// The Cangjie GC reclaims objects based on last-use: once a param set is handed to the native
+// side via toPointer(), the GC may consider it dead and run its finalizer (~init) while the
+// native Hks* call is still reading the buffer, causing use-after-free on the gc-helper thread.
+// Pinning the object in this static map keeps it reachable from a GC root until the FFI call
+// returns, after which unpin() lets the GC reclaim it normally (single release path in ~init).
+let paramSetKeeper = ConcurrentHashMap<Int64, Object>()
+let paramSetPinSeq = AtomicInt64(0)
+
 class HksParamSet {
     var paramSetSize: UInt32
     var paramCnt: UInt32
     // rawbuffer is automatically destructed based on the lifecycle.
     var rawBuffer: CPointer<Byte>
     var paramPtr: CPointer<Byte>
+    var pinId: Int64
 
     /**
      * @throws { BusinessException } 17620001 - Memory error.
      */
     init(properties: Array<HuksParam>) {
+        this.pinId = -1
         this.paramCnt = 0
         this.paramSetSize = UInt32(sizeOf<UInt32>() * 2)
         this.rawBuffer = CPointer<Byte>()
@@ -378,6 +391,28 @@ class HksParamSet {
         }
     }
 
+    /**
+     * Pins this object to a static GC root (paramSetKeeper) so that the GC cannot reclaim it
+     * while the native side is still using rawBuffer during an FFI call. Call this right after
+     * construction, before any other allocation that may trigger GC.
+     */
+    func pin() {
+        this.pinId = paramSetPinSeq.fetchAdd(1)
+        paramSetKeeper.put(this.pinId, this)
+    }
+
+    /**
+     * Unpins this object, normally in the finally block after the FFI call returns. After this,
+     * the object can be reclaimed by the GC normally and rawBuffer is released exactly once
+     * by ~init.
+     */
+    func unpin() {
+        if (this.pinId >= 0) {
+            paramSetKeeper.remove(this.pinId)
+            this.pinId = -1
+        }
+    }
+
     func clear() {
         clearInner(this.rawBuffer, this.paramCnt)
         this.rawBuffer = CPointer() // set to null, avoid double free in ~init
@@ -399,16 +434,38 @@ class HksParamSet {
 
 class ReadOnlyHksParamSet {
     let rawBuffer: CPointer<Byte>
+    var pinId: Int64
 
     /**
      * @throws { BusinessException } 17620001 - Memory error.
      */
     init(paramSetSize: UInt32) {
+        this.pinId = -1
         this.rawBuffer = LibC.malloc<Byte>(count: Int64(paramSetSize))
         if (rawBuffer.isNull()) {
             throw BusinessException(17620001, "Memory error.")
         }
         unsafe { CPointer<UInt32>(this.rawBuffer).write(paramSetSize) }
+    }
+
+    /**
+     * Pins this object to a static GC root (paramSetKeeper) so that the GC cannot reclaim it
+     * while the native side is still writing into rawBuffer during an FFI call. Call this
+     * right after construction, before any other allocation that may trigger GC.
+     */
+    func pin() {
+        this.pinId = paramSetPinSeq.fetchAdd(1)
+        paramSetKeeper.put(this.pinId, this)
+    }
+
+    /**
+     * Unpins this object, normally in the finally block after the FFI call returns.
+     */
+    func unpin() {
+        if (this.pinId >= 0) {
+            paramSetKeeper.remove(this.pinId)
+            this.pinId = -1
+        }
     }
 
     func collectData(): Array<HuksParam> {
