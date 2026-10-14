@@ -89,6 +89,7 @@ public func initSession(keyAlias: String, options: HuksOptions): HuksSessionHand
             throw hksCodeToException(retCode)
         }
     } finally {
+        paramSet.clear()
         unsafe {
             LibC.free(keyAliasCstr)
             handle.free()
@@ -219,31 +220,35 @@ func updateOrFinishSession(params: SessionParams, properties: Array<HuksParam>,
         throw e	
     }	
 
-    if (!token.isEmpty()) {	
-        if (!paramSet.write(HuksTag.HUKS_TAG_AUTH_TOKEN, token)) {	
-            throw BusinessException(	
-                HuksExceptionErrCode.HuksErrCodeIllegalArgument.getValue(),	
-                "properties too big"	
-            )	
-        }	
-    }	
-    // create OhosHksBlob for user ffi from handle 	
-    var handleBlob: OhosHksBlob
     try {
-        handleBlob = unsafe { OhosHksBlob.mallocFromBytes(handle.data) }
-    } catch (e: Exception) {
-        throw e
-    }
-    var cinBlob = params.inBlob
-    var coutBlob = params.outBlob
-    let retCode = unsafe {
-        if (isUpdate) {
-            FfiOHOSUpdateSession(inout handleBlob, paramSet.toPointer(), inout cinBlob, inout coutBlob)
-        } else {
-            FfiOHOSFinishSession(inout handleBlob, paramSet.toPointer(), inout cinBlob, inout coutBlob)
+        if (!token.isEmpty()) {	
+            if (!paramSet.write(HuksTag.HUKS_TAG_AUTH_TOKEN, token)) {	
+                throw BusinessException(	
+                    HuksExceptionErrCode.HuksErrCodeIllegalArgument.getValue(),	
+                    "properties too big"	
+                )	
+            }	
+        }	
+        // create OhosHksBlob for user ffi from handle 	
+        var handleBlob: OhosHksBlob
+        try {
+            handleBlob = unsafe { OhosHksBlob.mallocFromBytes(handle.data) }
+        } catch (e: Exception) {
+            throw e
         }
+        var cinBlob = params.inBlob
+        var coutBlob = params.outBlob
+        let retCode = unsafe {
+            if (isUpdate) {
+                FfiOHOSUpdateSession(inout handleBlob, paramSet.toPointer(), inout cinBlob, inout coutBlob)
+            } else {
+                FfiOHOSFinishSession(inout handleBlob, paramSet.toPointer(), inout cinBlob, inout coutBlob)
+            }
+        }
+        processRet(retCode, coutBlob, handleBlob)
+    } finally {
+        paramSet.clear()
     }
-    processRet(retCode, coutBlob, handleBlob)
 }
 
 func getOutBlogSize(inData: Array<UInt8>) {
@@ -309,6 +314,7 @@ public func abortSession(handle: HuksHandleId, options: HuksOptions): Unit {
             throw hksCodeToException(retCode)
         }
     } finally {
+        paramSet.clear()
         unsafe {
             handleBlob.free()
         }

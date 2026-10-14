@@ -72,6 +72,10 @@ public func hasKeyItem(keyAlias: String, options: HuksOptions): Bool {
             throw hksCodeToException(retCode)
         }
     } finally {
+        match (paramSet) {
+            case Some(ps) => ps.clear()
+            case None => ()
+        }
         unsafe {
             LibC.free(keyAliasCstr)
         }
@@ -203,6 +207,7 @@ public func anonAttestKeyItem(keyAlias: String, options: HuksOptions): Array<Str
             throw hksCodeToException(retCode)
         }
     } finally {
+        paramSet.clear()
         unsafe {
             LibC.free(keyAliasCstr)
             certBlobArray |> forEach({blob: OhosHksBlob => blob.free()})
@@ -331,6 +336,8 @@ public func importWrappedKeyItem(keyAlias: String, wrappingKeyAlias: String, opt
                 wrappedData.free()
             }
         }
+    } finally {
+        paramSet.clear()
     }
 }
 
@@ -384,6 +391,7 @@ public func generateKeyItem(keyAlias: String, options: HuksOptions): Unit {
             throw hksCodeToException(retCode)
         }
     } finally {
+        paramSetIn.clear()
         unsafe {
             LibC.free(keyAliasCstr)
         }
@@ -436,6 +444,10 @@ public func deleteKeyItem(keyAlias: String, options: HuksOptions): Unit {
             throw hksCodeToException(retCode)
         }
     } finally {
+        match (paramSet) {
+            case Some(ps) => ps.clear()
+            case None => ()
+        }
         unsafe {
             LibC.free(keyAliasCstr)
         }
@@ -504,6 +516,7 @@ public func importKeyItem(keyAlias: String, options: HuksOptions): Unit {
             throw hksCodeToException(retCode)
         }
     } finally {
+        paramSet.clear()
         unsafe {
             LibC.free(keyAliasCstr)
             keyBlob.free()
