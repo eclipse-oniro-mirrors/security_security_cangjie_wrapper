@@ -123,7 +123,7 @@ class HksParamSet {
     // may be rewritten in place by the native side (HksFreshParamSet redirects them to internal
     // offsets of the paramSet), so destruction must never free pointers read back from rawBuffer.
     // Only the pointers recorded here are freed, which are exactly the buffers we malloc'd.
-    var blobPtrs: ArrayList<CPointer<UInt8>>
+    private var blobPtrs: ArrayList<CPointer<UInt8>>
 
     /**
      * @throws { BusinessException } 17620001 - Memory error.
@@ -401,7 +401,7 @@ class HksParamSet {
      * still valid heap chunks, so freeing the recorded pointers is always correct.
      * Must stay static: finalizers cannot call instance functions.
      */
-    static func freeOwned(rawBuffer: CPointer<Byte>, blobPtrs: ArrayList<CPointer<UInt8>>) {
+    private static func freeOwned(rawBuffer: CPointer<Byte>, blobPtrs: ArrayList<CPointer<UInt8>>) {
         unsafe {
             for (p in blobPtrs) {
                 if (p.isNotNull()) {
