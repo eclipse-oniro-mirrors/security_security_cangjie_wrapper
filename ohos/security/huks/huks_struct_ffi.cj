@@ -382,13 +382,14 @@ class HksParamSet {
 
     ~init() {
         if (this.rawBuffer.isNotNull()) {
-            this.freeOwned()
+            HksParamSet.freeOwned(this.rawBuffer, this.blobPtrs)
         }
     }
 
     func clear() {
         if (this.rawBuffer.isNotNull()) {
-            this.freeOwned()
+            HksParamSet.freeOwned(this.rawBuffer, this.blobPtrs)
+            this.rawBuffer = CPointer() // set to null, avoid double free in ~init
         }
     }
 
@@ -398,17 +399,17 @@ class HksParamSet {
      * (HksFreshParamSet with isCopy=false) may have redirected those fields to interior offsets
      * of rawBuffer; freeing such interior pointers corrupts the heap. The original buffers are
      * still valid heap chunks, so freeing the recorded pointers is always correct.
+     * Must stay static: finalizers cannot call instance functions.
      */
-    private func freeOwned() {
+    static func freeOwned(rawBuffer: CPointer<Byte>, blobPtrs: ArrayList<CPointer<UInt8>>) {
         unsafe {
-            for (p in this.blobPtrs) {
+            for (p in blobPtrs) {
                 if (p.isNotNull()) {
                     LibC.free(p)
                 }
             }
-            LibC.free(this.rawBuffer)
+            LibC.free(rawBuffer)
         }
-        this.rawBuffer = CPointer() // set to null, avoid double free in ~init
     }
 }
 
