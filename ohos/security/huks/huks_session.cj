@@ -57,13 +57,11 @@ public func initSession(keyAlias: String, options: HuksOptions): HuksSessionHand
     let properties = options.properties
 
     let paramSet: HksParamSet = HksParamSet(properties)
-    paramSet.pin()
     let keyAliasCstr = unsafe { LibC.mallocCString(keyAlias) }
     var handle: OhosHksBlob
     try {
         handle = unsafe { OhosHksBlob.malloc(HANDLE_SIZE) }
     } catch (e: Exception) {
-        paramSet.unpin()
         unsafe { LibC.free(keyAliasCstr) }
         throw e
     }
@@ -71,7 +69,6 @@ public func initSession(keyAlias: String, options: HuksOptions): HuksSessionHand
     try {
         token = unsafe { OhosHksBlob.malloc(TOKEN_SIZE) }
     } catch (e: Exception) {
-        paramSet.unpin()
         unsafe { LibC.free(keyAliasCstr) }
         unsafe { handle.free() }
         throw e
@@ -92,7 +89,6 @@ public func initSession(keyAlias: String, options: HuksOptions): HuksSessionHand
             throw hksCodeToException(retCode)
         }
     } finally {
-        paramSet.unpin()
         unsafe {
             LibC.free(keyAliasCstr)
             handle.free()
@@ -218,41 +214,36 @@ func updateOrFinishSession(params: SessionParams, properties: Array<HuksParam>,
     handle: HuksHandleId, token: Bytes, isUpdate: Bool) {
     let paramSet: HksParamSet
     try {
-        paramSet = HksParamSet(properties)
+        paramSet = HksParamSet(properties)	
+    } catch (e: Exception) {		
+        throw e	
+    }	
+
+    if (!token.isEmpty()) {	
+        if (!paramSet.write(HuksTag.HUKS_TAG_AUTH_TOKEN, token)) {	
+            throw BusinessException(	
+                HuksExceptionErrCode.HuksErrCodeIllegalArgument.getValue(),	
+                "properties too big"	
+            )	
+        }	
+    }	
+    // create OhosHksBlob for user ffi from handle 	
+    var handleBlob: OhosHksBlob
+    try {
+        handleBlob = unsafe { OhosHksBlob.mallocFromBytes(handle.data) }
     } catch (e: Exception) {
         throw e
     }
-    paramSet.pin()
-
-    try {
-        if (!token.isEmpty()) {	
-            if (!paramSet.write(HuksTag.HUKS_TAG_AUTH_TOKEN, token)) {	
-                throw BusinessException(	
-                    HuksExceptionErrCode.HuksErrCodeIllegalArgument.getValue(),	
-                    "properties too big"	
-                )	
-            }	
-        }	
-        // create OhosHksBlob for user ffi from handle 	
-        var handleBlob: OhosHksBlob
-        try {
-            handleBlob = unsafe { OhosHksBlob.mallocFromBytes(handle.data) }
-        } catch (e: Exception) {
-            throw e
+    var cinBlob = params.inBlob
+    var coutBlob = params.outBlob
+    let retCode = unsafe {
+        if (isUpdate) {
+            FfiOHOSUpdateSession(inout handleBlob, paramSet.toPointer(), inout cinBlob, inout coutBlob)
+        } else {
+            FfiOHOSFinishSession(inout handleBlob, paramSet.toPointer(), inout cinBlob, inout coutBlob)
         }
-        var cinBlob = params.inBlob
-        var coutBlob = params.outBlob
-        let retCode = unsafe {
-            if (isUpdate) {
-                FfiOHOSUpdateSession(inout handleBlob, paramSet.toPointer(), inout cinBlob, inout coutBlob)
-            } else {
-                FfiOHOSFinishSession(inout handleBlob, paramSet.toPointer(), inout cinBlob, inout coutBlob)
-            }
-        }
-        processRet(retCode, coutBlob, handleBlob)
-    } finally {
-        paramSet.unpin()
     }
+    processRet(retCode, coutBlob, handleBlob)
 }
 
 func getOutBlogSize(inData: Array<UInt8>) {
@@ -306,7 +297,6 @@ public func abortSession(handle: HuksHandleId, options: HuksOptions): Unit {
     let properties =  options.properties
 
     let paramSet: HksParamSet = HksParamSet(properties)
-    paramSet.pin()
 
     var handleBlob = unsafe { OhosHksBlob.mallocFromBytes(handle.data) }
 
@@ -319,7 +309,6 @@ public func abortSession(handle: HuksHandleId, options: HuksOptions): Unit {
             throw hksCodeToException(retCode)
         }
     } finally {
-        paramSet.unpin()
         unsafe {
             handleBlob.free()
         }

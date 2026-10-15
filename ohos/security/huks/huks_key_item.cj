@@ -50,9 +50,7 @@ public func hasKeyItem(keyAlias: String, options: HuksOptions): Bool {
 
     let paramSet: Option<HksParamSet> = if (!options.properties.isEmpty()) {
         // may throw exception
-        let ps = HksParamSet(options.properties)
-        ps.pin()
-        Some(ps)
+        HksParamSet(options.properties)
     } else {
         None
     }
@@ -74,10 +72,6 @@ public func hasKeyItem(keyAlias: String, options: HuksOptions): Bool {
             throw hksCodeToException(retCode)
         }
     } finally {
-        match (paramSet) {
-            case Some(ps) => ps.unpin()
-            case None => ()
-        }
         unsafe {
             LibC.free(keyAliasCstr)
         }
@@ -113,7 +107,6 @@ public func getKeyItemProperties(keyAlias: String, _: HuksOptions): Array<HuksPa
     }
 
     let outParamSet = ReadOnlyHksParamSet(HKS_DEFAULT_OUTPARAMSET_SIZE)
-    outParamSet.pin()
 
     let keyAliasCstr = unsafe { LibC.mallocCString(keyAlias) }
 
@@ -129,7 +122,6 @@ public func getKeyItemProperties(keyAlias: String, _: HuksOptions): Array<HuksPa
             throw hksCodeToException(retCode)
         }
     } finally {
-        outParamSet.unpin()
         unsafe {
             LibC.free(keyAliasCstr)
         }
@@ -184,7 +176,6 @@ public func anonAttestKeyItem(keyAlias: String, options: HuksOptions): Array<Str
     )
 
     let paramSet: HksParamSet = HksParamSet(propertiesPlus)
-    paramSet.pin()
 
     let keyAliasCstr = unsafe { LibC.mallocCString(keyAlias) }
 
@@ -212,7 +203,6 @@ public func anonAttestKeyItem(keyAlias: String, options: HuksOptions): Array<Str
             throw hksCodeToException(retCode)
         }
     } finally {
-        paramSet.unpin()
         unsafe {
             LibC.free(keyAliasCstr)
             certBlobArray |> forEach({blob: OhosHksBlob => blob.free()})
@@ -318,9 +308,8 @@ public func importWrappedKeyItem(keyAlias: String, wrappingKeyAlias: String, opt
 
      if (options.inData.isEmpty()) {
         throw BusinessException(HuksExceptionErrCode.HuksErrCodeIllegalArgument.getValue(), "properties is None")
-    }
+    } 
     let inData = options.inData
-    paramSet.pin()
 
     try (
         keyAliasCstr = unsafe { LibC.mallocCString(keyAlias).asResource() },
@@ -342,8 +331,6 @@ public func importWrappedKeyItem(keyAlias: String, wrappingKeyAlias: String, opt
                 wrappedData.free()
             }
         }
-    } finally {
-        paramSet.unpin()
     }
 }
 
@@ -385,7 +372,6 @@ public func generateKeyItem(keyAlias: String, options: HuksOptions): Unit {
     let properties = options.properties
 
     var paramSetIn: HksParamSet = HksParamSet(properties)
-    paramSetIn.pin()
 
     let keyAliasCstr: CString = unsafe { LibC.mallocCString(keyAlias) }
 
@@ -398,7 +384,6 @@ public func generateKeyItem(keyAlias: String, options: HuksOptions): Unit {
             throw hksCodeToException(retCode)
         }
     } finally {
-        paramSetIn.unpin()
         unsafe {
             LibC.free(keyAliasCstr)
         }
@@ -433,9 +418,7 @@ public func deleteKeyItem(keyAlias: String, options: HuksOptions): Unit {
 
     let paramSet: Option<HksParamSet> = if (!options.properties.isEmpty()) {
         // may throw exception
-        let ps = HksParamSet(options.properties)
-        ps.pin()
-        Some(ps)
+        HksParamSet(options.properties)
     } else {
         None
     }
@@ -453,10 +436,6 @@ public func deleteKeyItem(keyAlias: String, options: HuksOptions): Unit {
             throw hksCodeToException(retCode)
         }
     } finally {
-        match (paramSet) {
-            case Some(ps) => ps.unpin()
-            case None => ()
-        }
         unsafe {
             LibC.free(keyAliasCstr)
         }
@@ -505,7 +484,6 @@ public func importKeyItem(keyAlias: String, options: HuksOptions): Unit {
     let inData = options.inData
 
     var paramSet: HksParamSet = HksParamSet(properties)
-    paramSet.pin()
 
     let keyAliasCstr: CString = unsafe { LibC.mallocCString(keyAlias) }
 
@@ -513,7 +491,6 @@ public func importKeyItem(keyAlias: String, options: HuksOptions): Unit {
     try {
         keyBlob = unsafe { OhosHksBlob.mallocFromBytes(inData) }
     } catch (e: Exception) {
-        paramSet.unpin()
         unsafe { LibC.free(keyAliasCstr) }
         throw e
     }
@@ -527,7 +504,6 @@ public func importKeyItem(keyAlias: String, options: HuksOptions): Unit {
             throw hksCodeToException(retCode)
         }
     } finally {
-        paramSet.unpin()
         unsafe {
             LibC.free(keyAliasCstr)
             keyBlob.free()
