@@ -334,7 +334,7 @@ class HksParamSet {
         let blob: OhosHksBlob = if (data.isEmpty()) {
             // if content is empty, write a null byte
             let byte = LibC.malloc<UInt8>()
-            this.blobPtrs.append(byte)
+            this.blobPtrs.add(byte)
             let _blob = OhosHksBlob(1, byte)
             unsafe { _blob.data.write(0) }
             _blob
@@ -343,7 +343,7 @@ class HksParamSet {
             if (blobData.isNull()) {
                 throw BusinessException(17620001, "Memory error.")
             }
-            this.blobPtrs.append(blobData)
+            this.blobPtrs.add(blobData)
             let _blob = OhosHksBlob(UInt32(data.size), blobData)
             unsafe {
                 let src = acquireArrayRawData(data)
@@ -408,7 +408,6 @@ class HksParamSet {
             }
             LibC.free(this.rawBuffer)
         }
-        this.blobPtrs.clear()
         this.rawBuffer = CPointer() // set to null, avoid double free in ~init
     }
 }
