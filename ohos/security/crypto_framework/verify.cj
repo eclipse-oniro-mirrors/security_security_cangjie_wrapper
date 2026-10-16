@@ -95,7 +95,7 @@ public class Verify {
         syscap: "SystemCapability.Security.CryptoFramework.Signature",
         throwexception: true
     ]
-    public func setVerifySpec(itemType: SignSpecItem, itemValue: Array<UInt8>): Unit {
+    public func setVerifySpec(itemType: SignSpecItem, itemValue: VerifyValueType): Unit {
         return ()
     }
 
@@ -105,7 +105,7 @@ public class Verify {
         throwexception: true
     ]
     public func getVerifySpec(itemType: SignSpecItem): ResultSpec {
-        return ResultSpec.STRING(String())
+        return ResultSpec.Ty_String(String())
     }
 
     public init() {

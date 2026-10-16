@@ -99,7 +99,7 @@ public class PriKey <: Key {
         throwexception: true
     ]
     public func getAsyKeySpec(itemType: AsyKeySpecItem): ResultSpec {
-        return ResultSpec.NUMBER(0)
+        return ResultSpec.Ty_Int32(0)
     }
 
     @!APILevel[
@@ -173,7 +173,7 @@ public class PubKey <: Key {
         throwexception: true
     ]
     public func getAsyKeySpec(itemType: AsyKeySpecItem): ResultSpec {
-        return ResultSpec.NUMBER(0)
+        return ResultSpec.Ty_Int32(0)
     }
 
     @!APILevel[

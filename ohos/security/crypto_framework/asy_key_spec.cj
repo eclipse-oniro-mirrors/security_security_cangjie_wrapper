@@ -344,22 +344,25 @@ public enum ResultSpec <: ToString {
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework"
     ]
-    BIGINT(BigInt)
-    | @!APILevel[
+    Ty_Bigint(BigInt)
+    |
+    @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework"
     ]
-    NUMBER(Int32)
-    | @!APILevel[
+    Ty_Int32(Int32)
+    |
+    @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework"
     ]
-    STRING(String)
-    | @!APILevel[
+    Ty_String(String)
+    |
+    @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework"
     ]
-    UINT8ARR(Array<UInt8>)
+    Ty_Uint8Array(Array<UInt8>)
     | ...
 
     @!APILevel[
@@ -369,4 +372,29 @@ public enum ResultSpec <: ToString {
     public func toString(): String {
         return String()
     }
+}
+
+/**
+ * Represents a Cangjie-specific type-safe alternative to the ArkTS union type int | Uint8Array.
+ *
+ * It is used, for example, as the parameter type of Verify.setVerifySpec, where the actual variant depends on the
+ * requested SignSpecItem parameter.
+ */
+@!APILevel[
+    since: "26.1.0",
+    syscap: "SystemCapability.Security.CryptoFramework"
+]
+public enum VerifyValueType {
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework"
+    ]
+    Ty_Uint8Array(Array<UInt8>)
+    |
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework"
+    ]
+    Ty_Int32(Int32)
+    | ...
 }
