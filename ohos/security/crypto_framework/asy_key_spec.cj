@@ -21,8 +21,8 @@ import ohos.labels.APILevel
 import std.math.numeric.BigInt
 
 /**
- * Enum for signing and signature verification parameters, which can be set by using setSignSpec and setVerifySpec,
- * and obtained by using getSignSpec and getVerifySpec.
+ * Enum for signature verification parameters, which can be set by using setVerifySpec, and obtained by using
+ * getVerifySpec.
  *
  * Currently, only RSA and SM2 are supported.
  */
@@ -85,6 +85,23 @@ public enum SignSpecItem {
     ]
     MlDsaContextUint8arr
     | ...
+
+    prop value: Int32 {
+        get() {
+            match (this) {
+                case PssMdNameStr => 100
+                case PssMgfNameStr => 101
+                case PssMgf1MdStr => 102
+                case PssSaltLenNum => 103
+                case PssTrailerFieldNum => 104
+                case Sm2UserIdUint8arr => 105
+                case MlDsaDeterministicBool => 106
+                case MlDsaMuBool => 107
+                case MlDsaContextUint8arr => 108
+                case _ => throw IllegalArgumentException("The type is not supported.")
+            }
+        }
+    }
 }
 
 extend SignSpecItem <: ToString {
@@ -93,7 +110,18 @@ extend SignSpecItem <: ToString {
         syscap: "SystemCapability.Security.CryptoFramework.Signature"
     ]
     public func toString(): String {
-        return String()
+        match (this) {
+            case PssMdNameStr => "PssMdNameStr"
+            case PssMgfNameStr => "PssMgfNameStr"
+            case PssMgf1MdStr => "PssMgf1MdStr"
+            case PssSaltLenNum => "PssSaltLenNum"
+            case PssTrailerFieldNum => "PssTrailerFieldNum"
+            case Sm2UserIdUint8arr => "Sm2UserIdUint8arr"
+            case MlDsaDeterministicBool => "MlDsaDeterministicBool"
+            case MlDsaMuBool => "MlDsaMuBool"
+            case MlDsaContextUint8arr => "MlDsaContextUint8arr"
+            case _ => throw IllegalArgumentException("The type is not supported.")
+        }
     }
 }
 
@@ -103,7 +131,7 @@ extend SignSpecItem <: Equatable<SignSpecItem> {
         syscap: "SystemCapability.Security.CryptoFramework.Signature"
     ]
     public operator func ==(other: SignSpecItem): Bool {
-        return true
+        return this.toString() == other.toString()
     }
 
     @!APILevel[
@@ -111,17 +139,7 @@ extend SignSpecItem <: Equatable<SignSpecItem> {
         syscap: "SystemCapability.Security.CryptoFramework.Signature"
     ]
     public operator func !=(other: SignSpecItem): Bool {
-        return true
-    }
-}
-
-extend SignSpecItem <: Hashable {
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Signature"
-    ]
-    public func hashCode(): Int64 {
-        return 0
+        return this.toString() != other.toString()
     }
 }
 
@@ -155,7 +173,19 @@ public enum AsyKeySpecItem {
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
     ]
-    EccPN
+    DsaSkBn
+    |
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
+    ]
+    DsaPkBn
+    |
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
+    ]
+    EccFpPBn
     |
     @!APILevel[
         since: "26.1.0",
@@ -173,13 +203,19 @@ public enum AsyKeySpecItem {
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
     ]
-    EccGBn
+    EccGXBn
     |
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
     ]
-    EccN
+    EccGYBn
+    |
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
+    ]
+    EccNBn
     |
     @!APILevel[
         since: "26.1.0",
@@ -295,6 +331,44 @@ public enum AsyKeySpecItem {
     ]
     X25519PkBn
     | ...
+
+    prop value: Int32 {
+        get() {
+            match (this) {
+                case DsaPBn => 101
+                case DsaQBn => 102
+                case DsaGBn => 103
+                case DsaSkBn => 104
+                case DsaPkBn => 105
+                case EccFpPBn => 201
+                case EccABn => 202
+                case EccBBn => 203
+                case EccGXBn => 204
+                case EccGYBn => 205
+                case EccNBn => 206
+                case EccHNum => 207
+                case EccSkBn => 208
+                case EccPkXBn => 209
+                case EccPkYBn => 210
+                case EccFieldTypeStr => 211
+                case EccFieldSizeNum => 212
+                case EccCurveNameStr => 213
+                case RsaNBn => 301
+                case RsaSkBn => 302
+                case RsaPkBn => 303
+                case DhPBn => 401
+                case DhGBn => 402
+                case DhLNum => 403
+                case DhSkBn => 404
+                case DhPkBn => 405
+                case Ed25519SkBn => 501
+                case Ed25519PkBn => 502
+                case X25519SkBn => 601
+                case X25519PkBn => 602
+                case _ => throw IllegalArgumentException("The type is not supported.")
+            }
+        }
+    }
 }
 
 extend AsyKeySpecItem <: ToString {
@@ -303,7 +377,39 @@ extend AsyKeySpecItem <: ToString {
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
     ]
     public func toString(): String {
-        return String()
+        match (this) {
+            case DsaPBn => "DsaPBn"
+            case DsaQBn => "DsaQBn"
+            case DsaGBn => "DsaGBn"
+            case DsaSkBn => "DsaSkBn"
+            case DsaPkBn => "DsaPkBn"
+            case EccFpPBn => "EccFpPBn"
+            case EccABn => "EccABn"
+            case EccBBn => "EccBBn"
+            case EccGXBn => "EccGXBn"
+            case EccGYBn => "EccGYBn"
+            case EccNBn => "EccNBn"
+            case EccHNum => "EccHNum"
+            case EccSkBn => "EccSkBn"
+            case EccPkXBn => "EccPkXBn"
+            case EccPkYBn => "EccPkYBn"
+            case EccFieldTypeStr => "EccFieldTypeStr"
+            case EccFieldSizeNum => "EccFieldSizeNum"
+            case EccCurveNameStr => "EccCurveNameStr"
+            case RsaNBn => "RsaNBn"
+            case RsaSkBn => "RsaSkBn"
+            case RsaPkBn => "RsaPkBn"
+            case DhPBn => "DhPBn"
+            case DhGBn => "DhGBn"
+            case DhLNum => "DhLNum"
+            case DhSkBn => "DhSkBn"
+            case DhPkBn => "DhPkBn"
+            case Ed25519SkBn => "Ed25519SkBn"
+            case Ed25519PkBn => "Ed25519PkBn"
+            case X25519SkBn => "X25519SkBn"
+            case X25519PkBn => "X25519PkBn"
+            case _ => throw IllegalArgumentException("The type is not supported.")
+        }
     }
 }
 
@@ -313,7 +419,7 @@ extend AsyKeySpecItem <: Equatable<AsyKeySpecItem> {
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
     ]
     public operator func ==(other: AsyKeySpecItem): Bool {
-        return true
+        return this.toString() == other.toString()
     }
 
     @!APILevel[
@@ -321,17 +427,7 @@ extend AsyKeySpecItem <: Equatable<AsyKeySpecItem> {
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
     ]
     public operator func !=(other: AsyKeySpecItem): Bool {
-        return true
-    }
-}
-
-extend AsyKeySpecItem <: Hashable {
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
-    ]
-    public func hashCode(): Int64 {
-        return 0
+        return this.toString() != other.toString()
     }
 }
 
@@ -339,62 +435,63 @@ extend AsyKeySpecItem <: Hashable {
     since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework"
 ]
-public enum ResultSpec <: ToString {
+public enum ResultSpec {
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework"
     ]
-    Ty_Bigint(BigInt)
+    BigintValue(BigInt)
     |
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework"
     ]
-    Ty_Int32(Int32)
+    Int32Value(Int32)
     |
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework"
     ]
-    Ty_String(String)
+    StringValue(String)
     |
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework"
     ]
-    Ty_Uint8Array(Array<UInt8>)
+    Uint8ArrayValue(Array<UInt8>)
     | ...
+}
 
+extend ResultSpec <: ToString {
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework"
     ]
     public func toString(): String {
-        return String()
+        match (this) {
+            case BigintValue(v) => v.toString()
+            case Int32Value(v) => v.toString()
+            case StringValue(v) => v
+            case Uint8ArrayValue(v) => v.toString()
+            case _ => throw IllegalArgumentException("The type is not supported.")
+        }
     }
 }
 
-/**
- * Represents a Cangjie-specific type-safe alternative to the ArkTS union type int | Uint8Array.
- *
- * It is used, for example, as the parameter type of Verify.setVerifySpec, where the actual variant depends on the
- * requested SignSpecItem parameter.
- */
-@!APILevel[
-    since: "26.1.0",
-    syscap: "SystemCapability.Security.CryptoFramework"
-]
-public enum VerifyValueType {
+extend ResultSpec <: Equatable<ResultSpec> {
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework"
     ]
-    Ty_Uint8Array(Array<UInt8>)
-    |
+    public operator func ==(other: ResultSpec): Bool {
+        return this.toString() == other.toString()
+    }
+
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework"
     ]
-    Ty_Int32(Int32)
-    | ...
+    public operator func !=(other: ResultSpec): Bool {
+        return this.toString() != other.toString()
+    }
 }

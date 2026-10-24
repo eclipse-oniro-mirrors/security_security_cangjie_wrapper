@@ -70,3 +70,46 @@ struct CParamsSpec {
         let authTag: HcfBlob
     ) {}
 }
+
+@C
+struct HcfBigInteger {
+    HcfBigInteger(
+        let data: CPointer<UInt8>,
+        let len: UInt32
+    ) {}
+
+    init(value: BigInt) {
+        let digits = value.toBytes()
+        digits.reverse()
+        unsafe {
+            if (digits.size == 0) {
+                this.data = CPointer<UInt8>()
+                this.len = 0
+            } else {
+                this.data = safeMalloc<UInt8>(count: digits.size)
+                this.len = UInt32(digits.size)
+                let cp = acquireArrayRawData(digits)
+                memcpy_s(this.data, UIntNative(this.len), cp.pointer, UIntNative(this.len))
+                releaseArrayRawData(cp)
+            }
+        }
+    }
+
+    func toArray(): Array<UInt8> {
+        if (data.isNull()) {
+            return []
+        }
+        let arr = Array<UInt8>(Int64(len), repeat: 0)
+        unsafe {
+            let cp = acquireArrayRawData(arr)
+            memcpy_s(cp.pointer, UIntNative(this.len), this.data, UIntNative(this.len))
+            releaseArrayRawData(cp)
+        }
+        arr.reverse()
+        return arr
+    }
+
+    func free(): Unit {
+        unsafe { LibC.free(data) }
+    }
+}

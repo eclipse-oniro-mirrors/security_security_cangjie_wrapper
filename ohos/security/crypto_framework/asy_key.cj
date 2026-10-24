@@ -17,48 +17,49 @@
 
 package ohos.security.crypto_framework
 
-import ohos.business_exception.AsyncCallback
+import ohos.ffi.{RemoteDataLite, releaseFFIData}
 import ohos.labels.APILevel
+import ohos.business_exception.{BusinessException, ERR_PARAMETER_ERROR}
+import std.math.numeric.BigInt
 
-/**
- * Encapsulates the parameters used for encrypting private keys.
- */
-@!APILevel[
-    since: "26.1.0",
-    syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
-]
-public class KeyEncodingConfig {
-    private var _password: String = String()
+foreign {
+    func FFiOHOSPriKeyGetAsyKeySpecByNum(id: Int64, itemType: Int32, errCode: CPointer<Int32>): IntNative
 
-    private var _cipherName: String = String()
+    func FFiOHOSPriKeyGetAsyKeySpecByStr(id: Int64, itemType: Int32, errCode: CPointer<Int32>): CString
 
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
-    ]
-    public mut prop password: String {
-        get() { return _password }
-        set(v) { _password = v }
-    }
+    func FFiOHOSPriKeyGetAsyKeySpecByBigInt(id: Int64, itemType: Int32, errCode: CPointer<Int32>): HcfBigInteger
 
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
-    ]
-    public mut prop cipherName: String {
-        get() { return _cipherName }
-        set(v) { _cipherName = v }
-    }
+    func FFiOHOSPriKeyGetEncoded(id: Int64, errCode: CPointer<Int32>): HcfBlob
 
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
-    ]
-    public init() {
-        super()
-        _password = String()
-        _cipherName = String()
-    }
+    func FFiOHOSPriKeyGetEncodedDer(id: Int64, format: CString, errCode: CPointer<Int32>): HcfBlob
+
+    func FFiOHOSPriKeyGetEncodedPem(id: Int64, format: CString, errCode: CPointer<Int32>): CString
+
+    func FFiOHOSPriKeyClearMem(id: Int64): Int32
+
+    func FfiOHOSPriKeyGetFormat(id: Int64, errCode: CPointer<Int32>): CString
+
+    func FFiOHOSPubKeyGetAsyKeySpecByNum(id: Int64, itemType: Int32, errCode: CPointer<Int32>): IntNative
+
+    func FFiOHOSPubKeyGetAsyKeySpecByStr(id: Int64, itemType: Int32, errCode: CPointer<Int32>): CString
+
+    func FFiOHOSPubKeyGetAsyKeySpecByBigInt(id: Int64, itemType: Int32, errCode: CPointer<Int32>): HcfBigInteger
+
+    func FFiOHOSPubKeyGetEncoded(id: Int64, errCode: CPointer<Int32>): HcfBlob
+
+    func FFiOHOSPubKeyGetEncodedDer(id: Int64, format: CString, errCode: CPointer<Int32>): HcfBlob
+
+    func FFiOHOSPubKeyGetEncodedPem(id: Int64, format: CString, errCode: CPointer<Int32>): CString
+
+    func FfiOHOSPubKeyGetFormat(id: Int64, errCode: CPointer<Int32>): CString
+
+    func FfiOHOSPubKeyGetRawPointer(id: Int64): CPointer<Unit>
+
+    func FfiOHOSPubKeyFromRawPointer(ptr: CPointer<Unit>, retString: CPointer<CPointer<UInt8>>, errCode: CPointer<Int32>): Int64
+
+    func FFiOHOSKeyPairPubKey(id: Int64, errCode: CPointer<Int32>): Int64
+
+    func FFiOHOSKeyPairPriKey(id: Int64, errCode: CPointer<Int32>): Int64
 }
 
 /**
@@ -68,13 +69,31 @@ public class KeyEncodingConfig {
     since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
 ]
-public class PriKey <: Key {
+public class PriKey <: RemoteDataLite & Key {
+    private let _algName: String
+
+    init(id: Int64, algName: String) {
+        super(id)
+        _algName = algName
+    }
+
+    ~init() {
+        releaseFFIData(myDataId)
+    }
+
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key"
     ]
     public prop format: String {
-        get() { return String() }
+        get() {
+            unsafe {
+                var errCode: Int32 = 0
+                let cstr = FfiOHOSPriKeyGetFormat(getID(), inout errCode)
+                checkAndThrow(errCode)
+                return cstr.toString()
+            }
+        }
     }
 
     @!APILevel[
@@ -82,15 +101,9 @@ public class PriKey <: Key {
         syscap: "SystemCapability.Security.CryptoFramework.Key"
     ]
     public prop algName: String {
-        get() { return String() }
-    }
-
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
-    ]
-    public func clearMem(): Unit {
-        return ()
+        get() {
+            return _algName
+        }
     }
 
     @!APILevel[
@@ -99,7 +112,34 @@ public class PriKey <: Key {
         throwexception: true
     ]
     public func getAsyKeySpec(itemType: AsyKeySpecItem): ResultSpec {
-        return ResultSpec.Ty_Int32(0)
+        let asyKeySpecItemType = getAsyKeySpecType(itemType.value)
+        if (asyKeySpecItemType == SPEC_ITEM_TYPE_BIG_INT) {
+            unsafe {
+                var errCode: Int32 = 0
+                let returnBigInt = FFiOHOSPriKeyGetAsyKeySpecByBigInt(getID(), itemType.value, inout errCode)
+                checkAndThrow(errCode)
+                let res = ResultSpec.BigintValue(BigInt(true, returnBigInt.toArray()))
+                returnBigInt.free()
+                return res
+            }
+        } else if (asyKeySpecItemType == SPEC_ITEM_TYPE_NUM) {
+            unsafe {
+                var errCode: Int32 = 0
+                let returnNum = FFiOHOSPriKeyGetAsyKeySpecByNum(getID(), itemType.value, inout errCode)
+                checkAndThrow(errCode)
+                return ResultSpec.Int32Value(Int32(returnNum))
+            }
+        } else if (asyKeySpecItemType == SPEC_ITEM_TYPE_STR) {
+            unsafe {
+                var errCode: Int32 = 0
+                let returnString = FFiOHOSPriKeyGetAsyKeySpecByStr(getID(), itemType.value, inout errCode)
+                checkAndThrow(errCode)
+                let res = ResultSpec.StringValue(returnString.toString())
+                LibC.free(returnString)
+                return res
+            }
+        }
+        throw BusinessException(ERR_PARAMETER_ERROR, "AsyKeySpecItem not support!")
     }
 
     @!APILevel[
@@ -108,7 +148,16 @@ public class PriKey <: Key {
         throwexception: true
     ]
     public func getEncodedDer(format: String): DataBlob {
-        return DataBlob(Array())
+        unsafe {
+            let cformat = LibC.mallocCString(format)
+            var errCode: Int32 = 0
+            let returnBlob: HcfBlob = FFiOHOSPriKeyGetEncodedDer(getID(), cformat, inout errCode)
+            LibC.free(cformat)
+            checkAndThrow(errCode)
+            let blob = returnBlob.toDataBlob()
+            returnBlob.free()
+            return blob
+        }
     }
 
     @!APILevel[
@@ -117,16 +166,16 @@ public class PriKey <: Key {
         throwexception: true
     ]
     public func getEncodedPem(format: String): String {
-        return String()
-    }
-
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
-        throwexception: true
-    ]
-    public func getEncodedPem(format: String, config: KeyEncodingConfig): String {
-        return String()
+        unsafe {
+            let cformat = LibC.mallocCString(format)
+            var errCode: Int32 = 0
+            let ret: CString = FFiOHOSPriKeyGetEncodedPem(getID(), cformat, inout errCode)
+            LibC.free(cformat)
+            checkAndThrow(errCode)
+            let str = ret.toString()
+            LibC.free(ret)
+            return str
+        }
     }
 
     @!APILevel[
@@ -135,11 +184,25 @@ public class PriKey <: Key {
         throwexception: true
     ]
     public func getEncoded(): DataBlob {
-        return DataBlob(Array())
+        unsafe {
+            var errCode: Int32 = 0
+            let returnBlob: HcfBlob = FFiOHOSPriKeyGetEncoded(getID(), inout errCode)
+            checkAndThrow(errCode)
+            let blob = returnBlob.toDataBlob()
+            returnBlob.free()
+            return blob
+        }
     }
 
-    public init() {
-        super()
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
+    ]
+    public func clearMem(): Unit {
+        unsafe {
+            let errCode = FFiOHOSPriKeyClearMem(getID())
+            checkAndThrow(errCode)
+        }
     }
 }
 
@@ -150,13 +213,31 @@ public class PriKey <: Key {
     since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
 ]
-public class PubKey <: Key {
+public class PubKey <: RemoteDataLite & Key {
+    private let _algName: String
+
+    init(id: Int64, algName: String) {
+        super(id)
+        _algName = algName
+    }
+
+    ~init() {
+        releaseFFIData(myDataId)
+    }
+
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key"
     ]
     public prop format: String {
-        get() { return String() }
+        get() {
+            unsafe {
+                var errCode: Int32 = 0
+                let cstr = FfiOHOSPubKeyGetFormat(getID(), inout errCode)
+                checkAndThrow(errCode)
+                return cstr.toString()
+            }
+        }
     }
 
     @!APILevel[
@@ -164,7 +245,9 @@ public class PubKey <: Key {
         syscap: "SystemCapability.Security.CryptoFramework.Key"
     ]
     public prop algName: String {
-        get() { return String() }
+        get() {
+            return _algName
+        }
     }
 
     @!APILevel[
@@ -173,7 +256,34 @@ public class PubKey <: Key {
         throwexception: true
     ]
     public func getAsyKeySpec(itemType: AsyKeySpecItem): ResultSpec {
-        return ResultSpec.Ty_Int32(0)
+        let asyKeySpecItemType = getAsyKeySpecType(itemType.value)
+        if (asyKeySpecItemType == SPEC_ITEM_TYPE_BIG_INT) {
+            unsafe {
+                var errCode: Int32 = 0
+                let returnBigInt = FFiOHOSPubKeyGetAsyKeySpecByBigInt(getID(), itemType.value, inout errCode)
+                checkAndThrow(errCode)
+                let res = ResultSpec.BigintValue(BigInt(true, returnBigInt.toArray()))
+                returnBigInt.free()
+                return res
+            }
+        } else if (asyKeySpecItemType == SPEC_ITEM_TYPE_NUM) {
+            unsafe {
+                var errCode: Int32 = 0
+                let returnNum = FFiOHOSPubKeyGetAsyKeySpecByNum(getID(), itemType.value, inout errCode)
+                checkAndThrow(errCode)
+                return ResultSpec.Int32Value(Int32(returnNum))
+            }
+        } else if (asyKeySpecItemType == SPEC_ITEM_TYPE_STR) {
+            unsafe {
+                var errCode: Int32 = 0
+                let returnString = FFiOHOSPubKeyGetAsyKeySpecByStr(getID(), itemType.value, inout errCode)
+                checkAndThrow(errCode)
+                let res = ResultSpec.StringValue(returnString.toString())
+                LibC.free(returnString)
+                return res
+            }
+        }
+        throw BusinessException(ERR_PARAMETER_ERROR, "AsyKeySpecItem not support!")
     }
 
     @!APILevel[
@@ -182,7 +292,16 @@ public class PubKey <: Key {
         throwexception: true
     ]
     public func getEncodedDer(format: String): DataBlob {
-        return DataBlob(Array())
+        unsafe {
+            let cformat = LibC.mallocCString(format)
+            var errCode: Int32 = 0
+            let returnBlob: HcfBlob = FFiOHOSPubKeyGetEncodedDer(getID(), cformat, inout errCode)
+            LibC.free(cformat)
+            checkAndThrow(errCode)
+            let blob = returnBlob.toDataBlob()
+            returnBlob.free()
+            return blob
+        }
     }
 
     @!APILevel[
@@ -191,7 +310,16 @@ public class PubKey <: Key {
         throwexception: true
     ]
     public func getEncodedPem(format: String): String {
-        return String()
+        unsafe {
+            let cformat = LibC.mallocCString(format)
+            var errCode: Int32 = 0
+            let ret: CString = FFiOHOSPubKeyGetEncodedPem(getID(), cformat, inout errCode)
+            LibC.free(cformat)
+            checkAndThrow(errCode)
+            let str = ret.toString()
+            LibC.free(ret)
+            return str
+        }
     }
 
     @!APILevel[
@@ -200,11 +328,28 @@ public class PubKey <: Key {
         throwexception: true
     ]
     public func getEncoded(): DataBlob {
-        return DataBlob(Array())
+        unsafe {
+            var errCode: Int32 = 0
+            let returnBlob: HcfBlob = FFiOHOSPubKeyGetEncoded(getID(), inout errCode)
+            checkAndThrow(errCode)
+            let blob = returnBlob.toDataBlob()
+            returnBlob.free()
+            return blob
+        }
     }
 
-    public init() {
-        super()
+    func getRawPointer(): CPointer<Unit> {
+        return unsafe { FfiOHOSPubKeyGetRawPointer(getID()) }
+    }
+
+    static func createFromRawPointer(ptr: CPointer<Unit>): PubKey {
+        unsafe {
+            var errCode: Int32 = 0
+            var retString = CPointer<UInt8>()
+            let id = FfiOHOSPubKeyFromRawPointer(ptr, inout retString, inout errCode)
+            checkAndThrow(errCode)
+            return PubKey(id, CString(retString).toString())
+        }
     }
 }
 
@@ -215,13 +360,35 @@ public class PubKey <: Key {
     since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
 ]
-public class KeyPair {
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
-    ]
-    public prop priKey: PriKey {
-        get() { return PriKey() }
+public class KeyPair <: RemoteDataLite {
+    private let _algName: String
+    private let _pubKey: ?PubKey
+    private let _priKey: ?PriKey
+
+    init(id: Int64, algName: String) {
+        super(id)
+        _algName = algName
+
+        unsafe {
+            var errCode: Int32 = 0
+            let pubId = FFiOHOSKeyPairPubKey(getID(), inout errCode)
+            _pubKey = if (errCode == 0) {
+                PubKey(pubId, algName)
+            } else {
+                None
+            }
+            errCode = 0
+            let priId = FFiOHOSKeyPairPriKey(getID(), inout errCode)
+            _priKey = if (errCode == 0) {
+                PriKey(priId, algName)
+            } else {
+                None
+            }
+        }
+    }
+
+    ~init() {
+        releaseFFIData(myDataId)
     }
 
     @!APILevel[
@@ -229,88 +396,18 @@ public class KeyPair {
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
     ]
     public prop pubKey: PubKey {
-        get() { return PubKey() }
+        get() {
+            _pubKey ?? throw BusinessException(ERR_PARAMETER_ERROR, "[KeyPair] pubKey: Parameter error.")
+        }
     }
 
-    public init() {
-        super()
-    }
-}
-
-/**
- * Asymmetric key generator class, defining methods for generating asymmetric keys.
- */
-@!APILevel[
-    since: "26.1.0",
-    syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
-]
-public class AsyKeyGenerator {
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
     ]
-    public prop algName: String {
-        get() { return String() }
+    public prop priKey: PriKey {
+        get() {
+            _priKey ?? throw BusinessException(ERR_PARAMETER_ERROR, "[KeyPair] priKey: Parameter error.")
+        }
     }
-
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
-        throwexception: true
-    ]
-    public func generateKeyPair(callback: AsyncCallback<KeyPair>): Unit {
-        return ()
-    }
-
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
-        throwexception: true
-    ]
-    public func convertKey(pubKey: DataBlob, priKey: DataBlob, callback: AsyncCallback<KeyPair>): Unit {
-        return ()
-    }
-
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
-        throwexception: true
-    ]
-    public func convertKey(pubKey: ?DataBlob, priKey: ?DataBlob, callback: AsyncCallback<KeyPair>): Unit {
-        return ()
-    }
-
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
-        throwexception: true
-    ]
-    public func convertPemKey(pubKey: ?String, priKey: ?String, callback: AsyncCallback<KeyPair>): Unit {
-        return ()
-    }
-
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
-        throwexception: true
-    ]
-    public func convertPemKey(pubKey: ?String, priKey: ?String, password: String, callback: AsyncCallback<KeyPair>): Unit {
-        return ()
-    }
-
-    public init() {
-        super()
-    }
-}
-
-/**
- * Creates an AsyKeyGenerator instance based on the specified algorithm.
- */
-@!APILevel[
-    since: "26.1.0",
-    syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
-    throwexception: true
-]
-public func createAsyKeyGenerator(algName: String): AsyKeyGenerator {
-    return AsyKeyGenerator()
 }
