@@ -37,6 +37,12 @@ foreign {
 
 /**
  * Creates an AsyKeyGenerator instance based on the specified algorithm.
+ *
+ * @param { String } algName - Algorithm used by the asymmetric keys. For details, see the Asymmetric Key Generation
+ *     and Conversion Specifications.
+ * @returns { AsyKeyGenerator } Returns the AsyKeyGenerator instance corresponding to the specified algorithm.
+ * @throws { BusinessException } 801 - This operation is not supported.
+ * @throws { BusinessException } 17620001 - Memory operation failed.
  */
 @!APILevel[
     since: "26.1.0",
@@ -73,6 +79,9 @@ public class AsyKeyGenerator <: RemoteDataLite {
         releaseFFIData(myDataId)
     }
 
+    /**
+     * Indicates the algorithm name of the AsyKeyGenerator object.
+     */
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
@@ -83,6 +92,15 @@ public class AsyKeyGenerator <: RemoteDataLite {
         }
     }
 
+    /**
+     * Generates a random key pair using this asymmetric key generator. This API uses an asynchronous callback to
+     * return the result.
+     *
+     * @param { AsyncCallback<KeyPair> } callback - Callback used to return the result. If the operation is
+     *     successful, **data** is the key pair obtained.
+     * @throws { BusinessException } 17620001 - Memory operation failed.
+     * @throws { BusinessException } 17630001 - Crypto operation error.
+     */
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
@@ -101,6 +119,19 @@ public class AsyKeyGenerator <: RemoteDataLite {
         }
     }
 
+    /**
+     * Converts data into an asymmetric key pair. This API uses an asynchronous callback to return the result.
+     *
+     * @param { AsyncCallback<KeyPair> } callback - Callback used to return the result. If the operation is
+     *     successful, **data** is the key pair obtained.
+     * @param { ?DataBlob } [pubKey] - Public key material to convert. If no public key needs to be converted, set this
+     *     parameter to **None**.
+     * @param { ?DataBlob } [priKey] - Private key material to convert. If no private key needs to be converted, set
+     *     this parameter to **None**.
+     * @throws { BusinessException } 17620001 - Memory operation failed.
+     * @throws { BusinessException } 17630001 - Crypto operation error.
+     * @throws { BusinessException } 17620003 - Parameter check failed.
+     */
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
@@ -155,6 +186,30 @@ public class AsyKeyGenerator <: RemoteDataLite {
         }
     }
 
+    /**
+     * Converts data into an asymmetric key pair. This API uses an asynchronous callback to return the result.
+     *
+     * Note:
+     * 1. When convertPemKey() is used to convert an external string into an asymmetric key object defined by the
+     * Crypto framework, the public key must comply with the ASN.1 syntax, X.509 specifications, and PEM encoding
+     * format, and the private key must comply with the ASN.1 syntax, PKCS #8 specifications, and PEM encoding format.
+     * 2. In convertPemKey(), you can pass in either pubKey or priKey, or both of them. If one of them is passed in,
+     * the returned KeyPair instance contains only the key converted from the data you passed in.
+     * 3. When convertPemKey is used to convert an external string into an asymmetric key object defined by the Crypto
+     * framework, the system does not verify whether the specifications of the generated key object are the same as
+     * the key specifications specified for the asymmetric key generator.
+     *
+     * @param { AsyncCallback<KeyPair> } callback - Callback used to return the result. If the operation is
+     *     successful, **data** is the key pair obtained.
+     * @param { ?String } [pubKey] - Public key material to convert. If no public key needs to be converted, set
+     *     this parameter to **None**.
+     * @param { ?String } [priKey] - Private key material to convert. If no private key needs to be converted,
+     *     set this parameter to **None**. Note: The public key and private key materials cannot be both None or empty
+     *     strings.
+     * @throws { BusinessException } 17620001 - Memory operation failed.
+     * @throws { BusinessException } 17630001 - Crypto operation error.
+     * @throws { BusinessException } 17620003 - Parameter check failed.
+     */
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
@@ -201,6 +256,32 @@ public class AsyKeyGenerator <: RemoteDataLite {
         }
     }
 
+    /**
+     * Converts data into an asymmetric key pair. Encrypted private keys are supported. The private key password is
+     * synchronously passed to decrypt the private key. This API uses an asynchronous callback to return the result.
+     *
+     * Note:
+     * 1. When convertPemKey() is used to convert an external string into an asymmetric key object defined by the
+     * Crypto framework, the public key must comply with the ASN.1 syntax, X.509 specifications, and PEM encoding
+     * format, and the private key must comply with the ASN.1 syntax, PKCS #8 specifications, and PEM encoding format.
+     * 2. In convertPemKey(), you can pass in either pubKey or priKey, or both of them. If one of them is passed in,
+     * the returned KeyPair instance contains only the key converted from the data you passed in.
+     * 3. When convertPemKey is used to convert an external string into an asymmetric key object defined by the Crypto
+     * framework, the system does not verify whether the specifications of the generated key object are the same as
+     * the key specifications specified for the asymmetric key generator.
+     * 4. If password is passed in, it can be used to decrypt the encrypted private key.
+     *
+     * @param { String } password - Password used to decrypt the private key.
+     * @param { AsyncCallback<KeyPair> } callback - Callback used to return the result. If the operation is
+     *     successful, **data** is the key pair obtained.
+     * @param { ?String } [pubKey] - Public key material to convert. If no public key needs to be converted, set
+     *     this parameter to **None**.
+     * @param { ?String } [priKey] - Private key material to convert. If no private key needs to be converted,
+     *     set this parameter to **None**. Note: The public key and private key materials cannot be both None or empty
+     *     strings.
+     * @throws { BusinessException } 17620001 - Memory operation failed.
+     * @throws { BusinessException } 17630001 - Crypto operation error.
+     */
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",

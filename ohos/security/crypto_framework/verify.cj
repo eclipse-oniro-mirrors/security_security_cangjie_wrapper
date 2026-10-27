@@ -47,6 +47,15 @@ foreign {
 
 /**
  * Creates a Verify instance.
+ *
+ * @param { String } algName - Signature verification algorithm to use. Currently, RSA, ECC, DSA, SM2, Ed25519 and
+ *     ML-DSA are supported.
+ *     If RSA PKCS1 is used, you must set the digest. If RSA PSS is used, you must set the digest and mask digest.
+ *     When the RSA algorithm is used for signature verification, you can use recover to verify and recover the
+ *     signed data.
+ * @returns { Verify } Returns the Verify instance corresponding to the specified algorithm.
+ * @throws { BusinessException } 801 - This operation is not supported.
+ * @throws { BusinessException } 17620001 - Memory operation failed.
  */
 @!APILevel[
     since: "26.1.0",
@@ -83,6 +92,9 @@ public class Verify <: RemoteDataLite {
         releaseFFIData(myDataId)
     }
 
+    /**
+     * Indicates the algorithm name of the Verify instance.
+     */
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature"
@@ -93,6 +105,17 @@ public class Verify <: RemoteDataLite {
         }
     }
 
+    /**
+     * Initializes the Verify object using a public key. This API uses an asynchronous callback to return the result.
+     * init, update, and verify must be used together. init and verify are mandatory, and update is optional.
+     *
+     * @param { PubKey } pubKey - Public key used to initialize the Verify instance.
+     * @param { AsyncCallback<Unit> } callback - Callback used to return the result.
+     * @throws { BusinessException } 17620001 - Memory operation failed.
+     * @throws { BusinessException } 17620002 - Failed to obtain the native object or convert parameters.
+     * @throws { BusinessException } 17630001 - Crypto operation error.
+     * @throws { BusinessException } 17620003 - Parameter check failed. Possible causes: 1. Incorrect key type.
+     */
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature",
@@ -109,6 +132,30 @@ public class Verify <: RemoteDataLite {
         }
     }
 
+    /**
+     * Updates the data for signature verification. This API uses an asynchronous callback to return the result.
+     *
+     * This API can be called only after the Verify instance is initialized using init or initSync.
+     *
+     * Note:
+     * You can call update multiple times or do not use update (call verify after init), depending on the data volume.
+     *
+     * The amount of the data to be passed in by update() (one-time or accumulative) is not limited. If there is a
+     * large amount of data, you are advised to call update() multiple times to pass in the data by segment. This
+     * prevents too much memory from being requested at a time.
+     *
+     * OnlyVerify cannot be used with update(). If OnlyVerify is specified, use verify() to pass in data.
+     *
+     * If the DSA algorithm is used for signature verification and the digest algorithm is NoHash, update() is not
+     * supported. If update() is called in this case, ERR_CRYPTO_OPERATION will be returned.
+     *
+     * @param { DataBlob } data - Data to pass in.
+     * @param { AsyncCallback<Unit> } callback - Callback used to return the result.
+     * @throws { BusinessException } 17620001 - Memory operation failed.
+     * @throws { BusinessException } 17620002 - Failed to obtain the native object or convert parameters.
+     * @throws { BusinessException } 17630001 - Crypto operation error.
+     * @throws { BusinessException } 17620004 - Invalid function call.
+     */
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature",
@@ -127,6 +174,18 @@ public class Verify <: RemoteDataLite {
         }
     }
 
+    /**
+     * Verifies the message, including the update data. This API uses an asynchronous callback to return the result.
+     *
+     * @param { DataBlob } data - Data to be verified.
+     * @param { DataBlob } signatureData - The signature data.
+     * @param { AsyncCallback<Bool> } callback - Callback used to return the result. The value **true**
+     *     indicates that the signature verification is successful, and **false** indicates the opposite.
+     * @throws { BusinessException } 17620001 - Memory operation failed.
+     * @throws { BusinessException } 17620002 - Failed to obtain the native object or convert parameters.
+     * @throws { BusinessException } 17630001 - Crypto operation error.
+     * @throws { BusinessException } 17620003 - Parameter check failed.
+     */
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature",
@@ -165,6 +224,18 @@ public class Verify <: RemoteDataLite {
         }
     }
 
+    /**
+     * Verifies the signature of the data. This API uses an asynchronous callback to return the result.
+     *
+     * @param { DataBlob } signatureData - Signature data.
+     * @param { AsyncCallback<Bool> } callback - Callback used to return the result. The value **true**
+     *     indicates that the signature verification is successful, and **false** indicates the opposite.
+     * @param { ?DataBlob } [data] - Data to pass in.
+     * @throws { BusinessException } 17620001 - Memory operation failed.
+     * @throws { BusinessException } 17620002 - Failed to obtain the native object or convert parameters.
+     * @throws { BusinessException } 17630001 - Crypto operation error.
+     * @throws { BusinessException } 17620003 - Parameter check failed.
+     */
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature",
@@ -208,6 +279,20 @@ public class Verify <: RemoteDataLite {
         }
     }
 
+    /**
+     * Recovers the original data from a signature. This API uses an asynchronous callback to return the result.
+     *
+     * Note:
+     * Currently, only RSA is supported.
+     *
+     * @param { DataBlob } signatureData - Signature data.
+     * @param { AsyncCallback<?DataBlob> } callback - Callback used to return the result. If the operation is
+     *     successful, **data** is the recovered original data.
+     * @throws { BusinessException } 17620001 - Memory operation failed.
+     * @throws { BusinessException } 17620002 - Failed to obtain the native object or convert parameters.
+     * @throws { BusinessException } 17630001 - Crypto operation error.
+     * @throws { BusinessException } 17620004 - Invalid function call.
+     */
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature",
@@ -236,6 +321,21 @@ public class Verify <: RemoteDataLite {
         }
     }
 
+    /**
+     * Sets signature verification specifications. You can use this API to set signature verification parameters that
+     * cannot be set by createVerify.
+     *
+     * Currently, only RSA and SM2 are supported.
+     *
+     * The parameters for signature verification must be the same as those for signing.
+     *
+     * @param { SignSpecItem } itemType - Signature verification parameter to set.
+     * @param { Int32 } itemValue - Value of the signature verification parameter to set.
+     * @throws { BusinessException } 801 - This operation is not supported.
+     * @throws { BusinessException } 17620001 - Memory operation failed.
+     * @throws { BusinessException } 17630001 - Crypto operation error.
+     * @throws { BusinessException } 17620003 - Parameter check failed.
+     */
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature",
@@ -248,6 +348,22 @@ public class Verify <: RemoteDataLite {
         }
     }
 
+    /**
+     * Sets the specified parameter for the Verify instance.
+     *
+     * Currently, only PSS_SALT_LEN in RSA and USER_ID in SM2 are supported.
+     *
+     * The parameters for signature verification must be the same as those for signing.
+     *
+     * @param { SignSpecItem } itemType - Indicates the specified parameter type.
+     * @param { Array<UInt8> } itemValue - The value of the specified parameter.
+     * @throws { BusinessException } 801 - This operation is not supported.
+     * @throws { BusinessException } 17620001 - Memory operation failed.
+     * @throws { BusinessException } 17620002 - Failed to obtain the native object or convert parameters.
+     * @throws { BusinessException } 17620003 - Parameter check failed.
+     * @throws { BusinessException } 17620004 - Invalid function call.
+     * @throws { BusinessException } 17630001 - Crypto operation error.
+     */
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature",
@@ -262,6 +378,16 @@ public class Verify <: RemoteDataLite {
         }
     }
 
+    /**
+     * Obtains signature verification specifications. Currently, only RSA is supported.
+     *
+     * @param { SignSpecItem } itemType - Signature verification parameter to obtain.
+     * @returns { ResultSpec } Returns the value of the parameter obtained.
+     * @throws { BusinessException } 801 - This operation is not supported.
+     * @throws { BusinessException } 17620001 - Memory operation failed.
+     * @throws { BusinessException } 17630001 - Crypto operation error.
+     * @throws { BusinessException } 17620003 - Parameter check failed.
+     */
     @!APILevel[
         since: "26.1.0",
         syscap: "SystemCapability.Security.CryptoFramework.Signature",
