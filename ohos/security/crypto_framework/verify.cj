@@ -122,12 +122,15 @@ public class Verify <: RemoteDataLite {
         throwexception: true
     ]
     public func initialize(pubKey: PubKey, callback: AsyncCallback<Unit>): Unit {
-        unsafe {
-            let errCode = FFiOHOSVerifyInit(getID(), pubKey.getID())
-            if (errCode != 0) {
-                callback(Some(BusinessException(errCode, "")), None)
-            } else {
-                callback(None, ())
+        spawn {
+            try {
+                unsafe {
+                    let errCode = FFiOHOSVerifyInit(getID(), pubKey.getID())
+                    checkAndThrow(errCode)
+                    callback(None, ())
+                }
+            } catch (err: BusinessException) {
+                callback(err, None)
             }
         }
     }
@@ -162,14 +165,17 @@ public class Verify <: RemoteDataLite {
         throwexception: true
     ]
     public func update(data: DataBlob, callback: AsyncCallback<Unit>): Unit {
-        unsafe {
-            let blob = HcfBlob(data)
-            let errCode = FFiOHOSVerifyUpdate(getID(), blob)
-            blob.free()
-            if (errCode != 0) {
-                callback(Some(BusinessException(errCode, "")), None)
-            } else {
-                callback(None, ())
+        spawn {
+            try {
+                unsafe {
+                    let blob = HcfBlob(data)
+                    let errCode = FFiOHOSVerifyUpdate(getID(), blob)
+                    blob.free()
+                    checkAndThrow(errCode)
+                    callback(None, ())
+                }
+            } catch (err: BusinessException) {
+                callback(err, None)
             }
         }
     }
@@ -192,34 +198,40 @@ public class Verify <: RemoteDataLite {
         throwexception: true
     ]
     public func verify(data: DataBlob, signatureData: DataBlob, callback: AsyncCallback<Bool>): Unit {
-        unsafe {
-            let dataBlob: CPointer<HcfBlob> = safeMalloc<HcfBlob>()
-            let dataHb: HcfBlob = try {
-                HcfBlob(data)
-            } catch (e: Exception) {
-                LibC.free(dataBlob)
-                throw e
-            }
-            dataBlob.write(dataHb)
-            let sigBlob: HcfBlob = try {
-                HcfBlob(signatureData)
-            } catch (e: Exception) {
-                dataHb.free()
-                LibC.free(dataBlob)
-                throw e
-            }
-            var errCode: Int32 = 0
-            let ret = FFiOHOSVerifyVerify(getID(), dataBlob, sigBlob, inout errCode)
+        spawn {
+            var dataBlob: CPointer<HcfBlob> = CPointer<HcfBlob>()
+            var dataHb: HcfBlob = HcfBlob(CPointer<UInt8>(), 0)
+            var sigBlob: HcfBlob = HcfBlob(CPointer<UInt8>(), 0)
             try {
-                if (errCode != 0) {
-                    callback(Some(BusinessException(errCode, "")), None)
-                } else {
+                unsafe {
+                    dataBlob = safeMalloc<HcfBlob>()
+                    dataHb = try {
+                        HcfBlob(data)
+                    } catch (e: Exception) {
+                        LibC.free(dataBlob)
+                        throw e
+                    }
+                    dataBlob.write(dataHb)
+                    sigBlob = try {
+                        HcfBlob(signatureData)
+                    } catch (e: Exception) {
+                        dataHb.free()
+                        LibC.free(dataBlob)
+                        throw e
+                    }
+                    var errCode: Int32 = 0
+                    let ret = FFiOHOSVerifyVerify(getID(), dataBlob, sigBlob, inout errCode)
+                    checkAndThrow(errCode)
                     callback(None, ret)
                 }
+            } catch (err: BusinessException) {
+                callback(err, None)
             } finally {
-                dataHb.free()
-                LibC.free(dataBlob)
-                sigBlob.free()
+                unsafe {
+                    dataHb.free()
+                    LibC.free(dataBlob)
+                    sigBlob.free()
+                }
             }
         }
     }
@@ -243,38 +255,43 @@ public class Verify <: RemoteDataLite {
     ]
     public func verify(signatureData: DataBlob, callback: AsyncCallback<Bool>,
         data!: Option<DataBlob> = None): Unit {
-        unsafe {
-            let dataBlob: CPointer<HcfBlob> = match (data) {
-                case Some(v) =>
-                    let ptr = safeMalloc<HcfBlob>()
-                    let blob = HcfBlob(v)
-                    ptr.write(blob)
-                    ptr
-                case None => CPointer<HcfBlob>()
-            }
-            let sigBlob: HcfBlob = try {
-                HcfBlob(signatureData)
-            } catch (e: Exception) {
-                if (dataBlob.isNotNull()) {
-                    dataBlob.read().free()
-                    LibC.free(dataBlob)
-                }
-                throw e
-            }
-            var errCode: Int32 = 0
-            let ret = FFiOHOSVerifyVerify(getID(), dataBlob, sigBlob, inout errCode)
+        spawn {
+            var dataBlob: CPointer<HcfBlob> = CPointer<HcfBlob>()
+            var sigBlob: HcfBlob = HcfBlob(CPointer<UInt8>(), 0)
             try {
-                if (errCode != 0) {
-                    callback(Some(BusinessException(errCode, "")), None)
-                } else {
+                unsafe {
+                    dataBlob = match (data) {
+                        case Some(v) =>
+                            let ptr = safeMalloc<HcfBlob>()
+                            let blob = HcfBlob(v)
+                            ptr.write(blob)
+                            ptr
+                        case None => CPointer<HcfBlob>()
+                    }
+                    sigBlob = try {
+                        HcfBlob(signatureData)
+                    } catch (e: Exception) {
+                        if (dataBlob.isNotNull()) {
+                            dataBlob.read().free()
+                            LibC.free(dataBlob)
+                        }
+                        throw e
+                    }
+                    var errCode: Int32 = 0
+                    let ret = FFiOHOSVerifyVerify(getID(), dataBlob, sigBlob, inout errCode)
+                    checkAndThrow(errCode)
                     callback(None, ret)
                 }
+            } catch (err: BusinessException) {
+                callback(err, None)
             } finally {
-                if (dataBlob.isNotNull()) {
-                    dataBlob.read().free()
-                    LibC.free(dataBlob)
+                unsafe {
+                    if (dataBlob.isNotNull()) {
+                        dataBlob.read().free()
+                        LibC.free(dataBlob)
+                    }
+                    sigBlob.free()
                 }
-                sigBlob.free()
             }
         }
     }
@@ -299,14 +316,14 @@ public class Verify <: RemoteDataLite {
         throwexception: true
     ]
     public func recover(signatureData: DataBlob, callback: AsyncCallback<?DataBlob>): Unit {
-        unsafe {
-            let input: HcfBlob = HcfBlob(signatureData)
+        spawn {
+            var input: HcfBlob = HcfBlob(CPointer<UInt8>(), 0)
             var output: HcfBlob = HcfBlob(CPointer<UInt8>(), 0)
-            let errCode = FFiOHOSVerifyRecover(getID(), input, inout output)
             try {
-                if (errCode != 0) {
-                    callback(Some(BusinessException(errCode, "")), None)
-                } else {
+                unsafe {
+                    input = HcfBlob(signatureData)
+                    let errCode = FFiOHOSVerifyRecover(getID(), input, inout output)
+                    checkAndThrow(errCode)
                     if (output.size == 0) {
                         callback(None, None)
                     } else {
@@ -314,9 +331,13 @@ public class Verify <: RemoteDataLite {
                         callback(None, blob)
                     }
                 }
+            } catch (err: BusinessException) {
+                callback(err, None)
             } finally {
-                input.free()
-                output.free()
+                unsafe {
+                    input.free()
+                    output.free()
+                }
             }
         }
     }

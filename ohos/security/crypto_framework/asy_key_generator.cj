@@ -107,15 +107,18 @@ public class AsyKeyGenerator <: RemoteDataLite {
         throwexception: true
     ]
     public func generateKeyPair(callback: AsyncCallback<KeyPair>): Unit {
-        unsafe {
-            var errCode: Int32 = 0
-            let id = FFiOHOSAsyKeyGeneratorGenerateKeyPair(getID(), inout errCode)
-            if (errCode != 0) {
-                callback(Some(BusinessException(errCode, "")), None)
-                return
+        spawn {
+            try {
+                unsafe {
+                    var errCode: Int32 = 0
+                    let id = FFiOHOSAsyKeyGeneratorGenerateKeyPair(getID(), inout errCode)
+                    checkAndThrow(errCode)
+                    let keyPair = KeyPair(id, _algName)
+                    callback(None, keyPair)
+                }
+            } catch (err: BusinessException) {
+                callback(err, None)
             }
-            let keyPair = KeyPair(id, _algName)
-            callback(None, keyPair)
         }
     }
 
@@ -139,48 +142,53 @@ public class AsyKeyGenerator <: RemoteDataLite {
     ]
     public func convertKey(callback: AsyncCallback<KeyPair>, pubKey!: Option<DataBlob> = None,
         priKey!: Option<DataBlob> = None): Unit {
-        unsafe {
-            let pub: CPointer<HcfBlob> = match (pubKey) {
-                case Some(v) =>
-                    let ptr = safeMalloc<HcfBlob>()
-                    let blob = HcfBlob(v)
-                    ptr.write(blob)
-                    ptr
-                case None => CPointer<HcfBlob>()
-            }
-            let pri: CPointer<HcfBlob> = try {
-                match (priKey) {
-                    case Some(v) =>
-                        let ptr = safeMalloc<HcfBlob>()
-                        let blob = HcfBlob(v)
-                        ptr.write(blob)
-                        ptr
-                    case None => CPointer<HcfBlob>()
-                }
-            } catch (e: Exception) {
-                if (pub.isNotNull()) {
-                    pub.read().free()
-                    LibC.free(pub)
-                }
-                throw e
-            }
-            var errCode: Int32 = 0
-            let id = FFiOHOSAsyKeyGeneratorConvertKey(getID(), pub, pri, inout errCode)
+        spawn {
+            var pub: CPointer<HcfBlob> = CPointer<HcfBlob>()
+            var pri: CPointer<HcfBlob> = CPointer<HcfBlob>()
             try {
-                if (errCode != 0) {
-                    callback(Some(BusinessException(errCode, "")), None)
-                } else {
+                unsafe {
+                    pub = match (pubKey) {
+                        case Some(v) =>
+                            let ptr = safeMalloc<HcfBlob>()
+                            let blob = HcfBlob(v)
+                            ptr.write(blob)
+                            ptr
+                        case None => CPointer<HcfBlob>()
+                    }
+                    pri = try {
+                        match (priKey) {
+                            case Some(v) =>
+                                let ptr = safeMalloc<HcfBlob>()
+                                let blob = HcfBlob(v)
+                                ptr.write(blob)
+                                ptr
+                            case None => CPointer<HcfBlob>()
+                        }
+                    } catch (e: Exception) {
+                        if (pub.isNotNull()) {
+                            pub.read().free()
+                            LibC.free(pub)
+                        }
+                        throw e
+                    }
+                    var errCode: Int32 = 0
+                    let id = FFiOHOSAsyKeyGeneratorConvertKey(getID(), pub, pri, inout errCode)
+                    checkAndThrow(errCode)
                     let keyPair = KeyPair(id, _algName)
                     callback(None, keyPair)
                 }
+            } catch (err: BusinessException) {
+                callback(err, None)
             } finally {
-                if (pub.isNotNull()) {
-                    pub.read().free()
-                    LibC.free(pub)
-                }
-                if (pri.isNotNull()) {
-                    pri.read().free()
-                    LibC.free(pri)
+                unsafe {
+                    if (pub.isNotNull()) {
+                        pub.read().free()
+                        LibC.free(pub)
+                    }
+                    if (pri.isNotNull()) {
+                        pri.read().free()
+                        LibC.free(pri)
+                    }
                 }
             }
         }
@@ -217,40 +225,45 @@ public class AsyKeyGenerator <: RemoteDataLite {
     ]
     public func convertPemKey(callback: AsyncCallback<KeyPair>, pubKey!: Option<String> = None,
         priKey!: Option<String> = None): Unit {
-        unsafe {
-            let pubCStr = match (pubKey) {
-                case Some(v) => LibC.mallocCString(v)
-                case None => CString(CPointer<UInt8>())
-            }
-            let priCStr = try {
-                match (priKey) {
-                    case Some(v) => LibC.mallocCString(v)
-                    case None => CString(CPointer<UInt8>())
-                }
-            } catch (e: Exception) {
-                match (pubKey) {
-                    case Some(_) => LibC.free(pubCStr)
-                    case None => ()
-                }
-                throw e
-            }
-            var errCode: Int32 = 0
-            let id = FFiOHOSAsyKeyGeneratorConvertPemKey(getID(), pubCStr, priCStr, inout errCode)
+        spawn {
+            var pubCStr: CString = CString(CPointer<UInt8>())
+            var priCStr: CString = CString(CPointer<UInt8>())
             try {
-                if (errCode != 0) {
-                    callback(Some(BusinessException(errCode, "")), None)
-                } else {
+                unsafe {
+                    pubCStr = match (pubKey) {
+                        case Some(v) => LibC.mallocCString(v)
+                        case None => CString(CPointer<UInt8>())
+                    }
+                    priCStr = try {
+                        match (priKey) {
+                            case Some(v) => LibC.mallocCString(v)
+                            case None => CString(CPointer<UInt8>())
+                        }
+                    } catch (e: Exception) {
+                        match (pubKey) {
+                            case Some(_) => LibC.free(pubCStr)
+                            case None => ()
+                        }
+                        throw e
+                    }
+                    var errCode: Int32 = 0
+                    let id = FFiOHOSAsyKeyGeneratorConvertPemKey(getID(), pubCStr, priCStr, inout errCode)
+                    checkAndThrow(errCode)
                     let keyPair = KeyPair(id, _algName)
                     callback(None, keyPair)
                 }
+            } catch (err: BusinessException) {
+                callback(err, None)
             } finally {
-                match (pubKey) {
-                    case Some(_) => LibC.free(pubCStr)
-                    case None => ()
-                }
-                match (priKey) {
-                    case Some(_) => LibC.free(priCStr)
-                    case None => ()
+                unsafe {
+                    match (pubKey) {
+                        case Some(_) => LibC.free(pubCStr)
+                        case None => ()
+                    }
+                    match (priKey) {
+                        case Some(_) => LibC.free(priCStr)
+                        case None => ()
+                    }
                 }
             }
         }
@@ -289,44 +302,50 @@ public class AsyKeyGenerator <: RemoteDataLite {
     ]
     public func convertPemKey(password: String, callback: AsyncCallback<KeyPair>,
         pubKey!: Option<String> = None, priKey!: Option<String> = None): Unit {
-        unsafe {
-            let pwdCStr = LibC.mallocCString(password)
-            let pubCStr = match (pubKey) {
-                case Some(v) => LibC.mallocCString(v)
-                case None => CString(CPointer<UInt8>())
-            }
-            let priCStr = try {
-                match (priKey) {
-                    case Some(v) => LibC.mallocCString(v)
-                    case None => CString(CPointer<UInt8>())
-                }
-            } catch (e: Exception) {
-                match (pubKey) {
-                    case Some(_) => LibC.free(pubCStr)
-                    case None => ()
-                }
-                LibC.free(pwdCStr)
-                throw e
-            }
-            var errCode: Int32 = 0
-            let id = FFiOHOSAsyKeyGeneratorConvertPemKeyWithPassword(getID(), pwdCStr, pubCStr, priCStr, inout errCode)
+        spawn {
+            var pwdCStr: CString = CString(CPointer<UInt8>())
+            var pubCStr: CString = CString(CPointer<UInt8>())
+            var priCStr: CString = CString(CPointer<UInt8>())
             try {
-                if (errCode != 0) {
-                    callback(Some(BusinessException(errCode, "")), None)
-                } else {
+                unsafe {
+                    pwdCStr = LibC.mallocCString(password)
+                    pubCStr = match (pubKey) {
+                        case Some(v) => LibC.mallocCString(v)
+                        case None => CString(CPointer<UInt8>())
+                    }
+                    priCStr = try {
+                        match (priKey) {
+                            case Some(v) => LibC.mallocCString(v)
+                            case None => CString(CPointer<UInt8>())
+                        }
+                    } catch (e: Exception) {
+                        match (pubKey) {
+                            case Some(_) => LibC.free(pubCStr)
+                            case None => ()
+                        }
+                        LibC.free(pwdCStr)
+                        throw e
+                    }
+                    var errCode: Int32 = 0
+                    let id = FFiOHOSAsyKeyGeneratorConvertPemKeyWithPassword(getID(), pwdCStr, pubCStr, priCStr, inout errCode)
+                    checkAndThrow(errCode)
                     let keyPair = KeyPair(id, _algName)
                     callback(None, keyPair)
                 }
+            } catch (err: BusinessException) {
+                callback(err, None)
             } finally {
-                match (pubKey) {
-                    case Some(_) => LibC.free(pubCStr)
-                    case None => ()
+                unsafe {
+                    match (pubKey) {
+                        case Some(_) => LibC.free(pubCStr)
+                        case None => ()
+                    }
+                    match (priKey) {
+                        case Some(_) => LibC.free(priCStr)
+                        case None => ()
+                    }
+                    LibC.free(pwdCStr)
                 }
-                match (priKey) {
-                    case Some(_) => LibC.free(priCStr)
-                    case None => ()
-                }
-                LibC.free(pwdCStr)
             }
         }
     }
