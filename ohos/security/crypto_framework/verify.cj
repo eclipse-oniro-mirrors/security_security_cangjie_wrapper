@@ -36,10 +36,6 @@ foreign {
 
     func FFiOHOSVerifySetVerifySpecByArr(id: Int64, itemValue: HcfBlob): Int32
 
-    func FFiOHOSVerifySetVerifySpecByNumWithType(id: Int64, item: Int32, itemValue: Int32): Int32
-
-    func FFiOHOSVerifySetVerifySpecByArrWithType(id: Int64, item: Int32, itemValue: HcfBlob): Int32
-
     func FFiOHOSVerifyGetVerifySpecString(id: Int64, item: Int32, errCode: CPointer<Int32>): CString
 
     func FFiOHOSVerifyGetVerifySpecNum(id: Int64, item: Int32, itemValue: CPointer<Int32>): Int32
@@ -363,9 +359,13 @@ public class Verify <: RemoteDataLite {
         throwexception: true
     ]
     public func setVerifySpec(itemType: SignSpecItem, itemValue: Int32): Unit {
-        unsafe {
-            let errCode = FFiOHOSVerifySetVerifySpecByNumWithType(getID(), itemType.value, itemValue)
-            checkAndThrow(errCode)
+        match (itemType) {
+            case PssSaltLenNum =>
+                unsafe {
+                    let errCode = FFiOHOSVerifySetVerifySpecByNum(getID(), itemValue)
+                    checkAndThrow(errCode)
+                }
+            case _ => throw BusinessException(ERR_PARAMETER_ERROR, "[Verify] setVerifySpec: specItem not support.")
         }
     }
 
@@ -391,11 +391,15 @@ public class Verify <: RemoteDataLite {
         throwexception: true
     ]
     public func setVerifySpec(itemType: SignSpecItem, itemValue: Array<UInt8>): Unit {
-        unsafe {
-            let blob = HcfBlob(DataBlob(itemValue))
-            let errCode = FFiOHOSVerifySetVerifySpecByArrWithType(getID(), itemType.value, blob)
-            blob.free()
-            checkAndThrow(errCode)
+        match (itemType) {
+            case Sm2UserIdUint8arr =>
+                unsafe {
+                    let blob = HcfBlob(DataBlob(itemValue))
+                    let errCode = FFiOHOSVerifySetVerifySpecByArr(getID(), blob)
+                    blob.free()
+                    checkAndThrow(errCode)
+                }
+            case _ => throw BusinessException(ERR_PARAMETER_ERROR, "[Verify] setVerifySpec: specItem not support.")
         }
     }
 

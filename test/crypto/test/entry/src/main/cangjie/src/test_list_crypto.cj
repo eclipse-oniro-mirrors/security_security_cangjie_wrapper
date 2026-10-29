@@ -31,4 +31,8 @@ func testsuite(): Unit {
     registerTestSuite("Test_Md_Missing_Add", {=> Test_Md_Missing_Add()})
     registerTestSuite("Test_Md_Operations_Add", {=> Test_Md_Operations_Add()})
     registerTestSuite("Test_Random_Operations_Add", {=> Test_Random_Operations_Add()})
+    registerTestSuite("Test_Create_Asy_Key_Generator_Add", {=> Test_Create_Asy_Key_Generator_Add()})
+    registerTestSuite("Test_Asy_Key_Generator_Operations_Add", {=> Test_Asy_Key_Generator_Operations_Add()})
+    registerTestSuite("Test_Asy_Key_Operations_Add", {=> Test_Asy_Key_Operations_Add()})
+    registerTestSuite("Test_Verify_Operations_Add", {=> Test_Verify_Operations_Add()})
 }
