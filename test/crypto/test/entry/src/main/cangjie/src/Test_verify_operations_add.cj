@@ -307,7 +307,7 @@ class Test_Verify_Operations_Add {
                     monitor.notify()
                 }
             }
-            verify.verify(fakeSig, callback, data!: Some(testData))
+            verify.verify(fakeSig, callback, data: Some(testData))
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -321,7 +321,7 @@ class Test_Verify_Operations_Add {
     }
 
     /**
-     * 测试Verify.verify(sig, callback, data!: None)重载 API - 有效等价类：update后不传数据验签
+     * 测试Verify.verify(sig, callback, data: None)重载 API - 有效等价类：update后不传数据验签
      */
     @TestCase
     @Tag[APILevel26_1, TestLevel0]
@@ -347,7 +347,7 @@ class Test_Verify_Operations_Add {
                     monitor.notify()
                 }
             }
-            verify.verify(fakeSig, callback, data!: None)
+            verify.verify(fakeSig, callback, data: None)
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -556,7 +556,7 @@ class Test_Verify_Operations_Add {
                     monitor.notify()
                 }
             }
-            verify.verify(fakeSig, callback, data!: None)
+            verify.verify(fakeSig, callback, data: None)
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }

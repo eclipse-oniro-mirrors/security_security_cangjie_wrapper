@@ -110,7 +110,7 @@ class Test_Asy_Key_Generator_Operations_Add {
                     monitor.notify()
                 }
             }
-            generator.convertKey(callback, pubKey!: Some(pubEncoded), priKey!: Some(priEncoded))
+            generator.convertKey(callback, pubKey: Some(pubEncoded), priKey: Some(priEncoded))
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -142,7 +142,7 @@ class Test_Asy_Key_Generator_Operations_Add {
                     monitor.notify()
                 }
             }
-            generator.convertKey(callback, pubKey!: None, priKey!: None)
+            generator.convertKey(callback, pubKey: None, priKey: None)
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -180,7 +180,7 @@ class Test_Asy_Key_Generator_Operations_Add {
                     monitor.notify()
                 }
             }
-            generator.convertPemKey(callback, pubKey!: Some(pubPem), priKey!: Some(priPem))
+            generator.convertPemKey(callback, pubKey: Some(pubPem), priKey: Some(priPem))
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -212,7 +212,7 @@ class Test_Asy_Key_Generator_Operations_Add {
                     monitor.notify()
                 }
             }
-            generator.convertPemKey(callback, pubKey!: Some("invalid pem data"), priKey!: Some("invalid pem data"))
+            generator.convertPemKey(callback, pubKey: Some("invalid pem data"), priKey: Some("invalid pem data"))
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -250,7 +250,7 @@ class Test_Asy_Key_Generator_Operations_Add {
                     monitor.notify()
                 }
             }
-            generator.convertPemKey("test123", callback, pubKey!: Some(pubPem), priKey!: Some(priPem))
+            generator.convertPemKey("test123", callback, pubKey: Some(pubPem), priKey: Some(priPem))
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
