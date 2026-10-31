@@ -119,11 +119,17 @@ class HksParamSet {
     // rawbuffer is automatically destructed based on the lifecycle.
     var rawBuffer: CPointer<Byte>
     var paramPtr: CPointer<Byte>
+    // Original malloc'd blob buffers owned by this object. The blob.data fields inside rawBuffer
+    // may be rewritten in place by the native side (HksFreshParamSet redirects them to internal
+    // offsets of the paramSet), so destruction must never free pointers read back from rawBuffer.
+    // Only the pointers recorded here are freed, which are exactly the buffers we malloc'd.
+    private var blobPtrs: ArrayList<CPointer<UInt8>>
 
     /**
      * @throws { BusinessException } 17620001 - Memory error.
      */
     init(properties: Array<HuksParam>) {
+        this.blobPtrs = ArrayList<CPointer<UInt8>>()
         this.paramCnt = 0
         this.paramSetSize = UInt32(sizeOf<UInt32>() * 2)
         this.rawBuffer = CPointer<Byte>()
@@ -328,6 +334,7 @@ class HksParamSet {
         let blob: OhosHksBlob = if (data.isEmpty()) {
             // if content is empty, write a null byte
             let byte = LibC.malloc<UInt8>()
+            this.blobPtrs.add(byte)
             let _blob = OhosHksBlob(1, byte)
             unsafe { _blob.data.write(0) }
             _blob
@@ -336,6 +343,7 @@ class HksParamSet {
             if (blobData.isNull()) {
                 throw BusinessException(17620001, "Memory error.")
             }
+            this.blobPtrs.add(blobData)
             let _blob = OhosHksBlob(UInt32(data.size), blobData)
             unsafe {
                 let src = acquireArrayRawData(data)
@@ -374,22 +382,30 @@ class HksParamSet {
 
     ~init() {
         if (this.rawBuffer.isNotNull()) {
-            HksParamSet.clearInner(this.rawBuffer, this.paramCnt)
+            HksParamSet.freeOwned(this.rawBuffer, this.blobPtrs)
         }
     }
 
     func clear() {
-        clearInner(this.rawBuffer, this.paramCnt)
-        this.rawBuffer = CPointer() // set to null, avoid double free in ~init
+        if (this.rawBuffer.isNotNull()) {
+            HksParamSet.freeOwned(this.rawBuffer, this.blobPtrs)
+            this.rawBuffer = CPointer() // set to null, avoid double free in ~init
+        }
     }
 
-    static func clearInner(rawBuffer: CPointer<Byte>, paramCnt: UInt32) {
+    /**
+     * Releases every buffer this object malloc'd. Blob buffers are freed from the recorded
+     * blobPtrs list instead of the blob.data fields inside rawBuffer, because the native side
+     * (HksFreshParamSet with isCopy=false) may have redirected those fields to interior offsets
+     * of rawBuffer; freeing such interior pointers corrupts the heap. The original buffers are
+     * still valid heap chunks, so freeing the recorded pointers is always correct.
+     * Must stay static: finalizers cannot call instance functions.
+     */
+    private static func freeOwned(rawBuffer: CPointer<Byte>, blobPtrs: ArrayList<CPointer<UInt8>>) {
         unsafe {
-            let ptr: CPointer<OhosHksParam> = CPointer<OhosHksParam>(rawBuffer + Int64(sizeOf<UInt32>() * 2))
-            for (i in 0..Int64(paramCnt)) {
-                let param: OhosHksParam = ptr.read(i)
-                if ((param.tag & HKS_TAG_TYPE_MASK) == HKS_TAG_TYPE_BYTES) {
-                    param.value.free()
+            for (p in blobPtrs) {
+                if (p.isNotNull()) {
+                    LibC.free(p)
                 }
             }
             LibC.free(rawBuffer)
