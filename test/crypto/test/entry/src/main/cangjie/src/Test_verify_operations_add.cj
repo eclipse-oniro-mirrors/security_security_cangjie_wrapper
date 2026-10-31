@@ -30,7 +30,7 @@ func awaitGenerateKeyPair(generator: AsyKeyGenerator): KeyPair {
     let monitor = Monitor()
     var result: ?KeyPair = None
     var errResult: ?BusinessException = None
-    generator.generateKeyPair({ err, keyPair =>
+    let callback: AsyncCallback<KeyPair> = { err, keyPair =>
         if (let Some(e) <- err) {
             errResult = e
         } else if (let Some(kp) <- keyPair) {
@@ -39,7 +39,8 @@ func awaitGenerateKeyPair(generator: AsyKeyGenerator): KeyPair {
         synchronized(monitor) {
             monitor.notify()
         }
-    })
+    }
+    generator.generateKeyPair(callback)
     synchronized(monitor) {
         monitor.wait(timeout: Duration.second * 10)
     }
@@ -53,7 +54,7 @@ func awaitVerifyInit(verify: Verify, pubKey: PubKey) {
     let monitor = Monitor()
     var errResult: ?BusinessException = None
     var done = false
-    verify.initialize(pubKey, { err, _ =>
+    let callback: AsyncCallback<Unit> = { err, _ =>
         if (let Some(e) <- err) {
             errResult = e
         }
@@ -61,7 +62,8 @@ func awaitVerifyInit(verify: Verify, pubKey: PubKey) {
         synchronized(monitor) {
             monitor.notify()
         }
-    })
+    }
+    verify.initialize(pubKey, callback)
     synchronized(monitor) {
         monitor.wait(timeout: Duration.second * 10)
     }
@@ -77,7 +79,7 @@ func awaitVerifyUpdate(verify: Verify, data: DataBlob) {
     let monitor = Monitor()
     var errResult: ?BusinessException = None
     var done = false
-    verify.update(data, { err, _ =>
+    let callback: AsyncCallback<Unit> = { err, _ =>
         if (let Some(e) <- err) {
             errResult = e
         }
@@ -85,7 +87,8 @@ func awaitVerifyUpdate(verify: Verify, data: DataBlob) {
         synchronized(monitor) {
             monitor.notify()
         }
-    })
+    }
+    verify.update(data, callback)
     synchronized(monitor) {
         monitor.wait(timeout: Duration.second * 10)
     }
@@ -101,7 +104,7 @@ func awaitVerifyResult(verify: Verify, data: DataBlob, sig: DataBlob): Bool {
     let monitor = Monitor()
     var result: ?Bool = None
     var errResult: ?BusinessException = None
-    verify.verify(data, sig, { err, verifyResult =>
+    let callback: AsyncCallback<Bool> = { err, verifyResult =>
         if (let Some(e) <- err) {
             errResult = e
         } else if (let Some(r) <- verifyResult) {
@@ -110,7 +113,8 @@ func awaitVerifyResult(verify: Verify, data: DataBlob, sig: DataBlob): Bool {
         synchronized(monitor) {
             monitor.notify()
         }
-    })
+    }
+    verify.verify(data, sig, callback)
     synchronized(monitor) {
         monitor.wait(timeout: Duration.second * 10)
     }
@@ -201,14 +205,15 @@ class Test_Verify_Operations_Add {
         try {
             let monitor = Monitor()
             var errResult: ?BusinessException = None
-            verify.update(testData, { err, _ =>
+            let callback: AsyncCallback<Unit> = { err, _ =>
                 if (let Some(e) <- err) {
                     errResult = e
                 }
                 synchronized(monitor) {
                     monitor.notify()
                 }
-            })
+            }
+            verify.update(testData, callback)
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -254,14 +259,15 @@ class Test_Verify_Operations_Add {
         try {
             let monitor = Monitor()
             var errResult: ?BusinessException = None
-            verify.verify(testData, fakeSig, { err, _ =>
+            let callback: AsyncCallback<Bool> = { err, _ =>
                 if (let Some(e) <- err) {
                     errResult = e
                 }
                 synchronized(monitor) {
                     monitor.notify()
                 }
-            })
+            }
+            verify.verify(testData, fakeSig, callback)
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -291,7 +297,7 @@ class Test_Verify_Operations_Add {
             let monitor = Monitor()
             var result: ?Bool = None
             var errResult: ?BusinessException = None
-            verify.verify(fakeSig, { err, verifyResult =>
+            let callback: AsyncCallback<Bool> = { err, verifyResult =>
                 if (let Some(e) <- err) {
                     errResult = e
                 } else if (let Some(r) <- verifyResult) {
@@ -300,7 +306,8 @@ class Test_Verify_Operations_Add {
                 synchronized(monitor) {
                     monitor.notify()
                 }
-            }, data!: Some(testData))
+            }
+            verify.verify(fakeSig, callback, data!: Some(testData))
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -331,7 +338,7 @@ class Test_Verify_Operations_Add {
             let monitor = Monitor()
             var callbackReceived = false
             var errResult: ?BusinessException = None
-            verify.verify(fakeSig, { err, _ =>
+            let callback: AsyncCallback<Bool> = { err, _ =>
                 if (let Some(e) <- err) {
                     errResult = e
                 }
@@ -339,7 +346,8 @@ class Test_Verify_Operations_Add {
                 synchronized(monitor) {
                     monitor.notify()
                 }
-            }, data!: None)
+            }
+            verify.verify(fakeSig, callback, data!: None)
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -368,7 +376,7 @@ class Test_Verify_Operations_Add {
             let monitor = Monitor()
             var callbackReceived = false
             var errResult: ?BusinessException = None
-            verify.recover(fakeSig, { err, _ =>
+            let callback: AsyncCallback<DataBlob> = { err, _ =>
                 if (let Some(e) <- err) {
                     errResult = e
                 }
@@ -376,7 +384,8 @@ class Test_Verify_Operations_Add {
                 synchronized(monitor) {
                     monitor.notify()
                 }
-            })
+            }
+            verify.recover(fakeSig, callback)
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -405,14 +414,15 @@ class Test_Verify_Operations_Add {
         try {
             let monitor = Monitor()
             var errResult: ?BusinessException = None
-            verify.recover(fakeSig, { err, _ =>
+            let callback: AsyncCallback<DataBlob> = { err, _ =>
                 if (let Some(e) <- err) {
                     errResult = e
                 }
                 synchronized(monitor) {
                     monitor.notify()
                 }
-            })
+            }
+            verify.recover(fakeSig, callback)
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -536,7 +546,7 @@ class Test_Verify_Operations_Add {
             let monitor = Monitor()
             var result: ?Bool = None
             var errResult: ?BusinessException = None
-            verify.verify(fakeSig, { err, verifyResult =>
+            let callback: AsyncCallback<Bool> = { err, verifyResult =>
                 if (let Some(e) <- err) {
                     errResult = e
                 } else if (let Some(r) <- verifyResult) {
@@ -545,7 +555,8 @@ class Test_Verify_Operations_Add {
                 synchronized(monitor) {
                     monitor.notify()
                 }
-            }, data!: None)
+            }
+            verify.verify(fakeSig, callback, data!: None)
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }

@@ -30,7 +30,7 @@ func awaitGenerateKeyPair(generator: AsyKeyGenerator): KeyPair {
     let monitor = Monitor()
     var result: ?KeyPair = None
     var errResult: ?BusinessException = None
-    generator.generateKeyPair({ err, keyPair =>
+    let callback: AsyncCallback<KeyPair> = { err, keyPair =>
         if (let Some(e) <- err) {
             errResult = e
         } else if (let Some(kp) <- keyPair) {
@@ -39,7 +39,8 @@ func awaitGenerateKeyPair(generator: AsyKeyGenerator): KeyPair {
         synchronized(monitor) {
             monitor.notify()
         }
-    })
+    }
+    generator.generateKeyPair(callback)
     synchronized(monitor) {
         monitor.wait(timeout: Duration.second * 10)
     }

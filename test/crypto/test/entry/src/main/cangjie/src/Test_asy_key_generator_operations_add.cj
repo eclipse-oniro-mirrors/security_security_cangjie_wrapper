@@ -30,7 +30,7 @@ func awaitGenerateKeyPair(generator: AsyKeyGenerator): KeyPair {
     let monitor = Monitor()
     var result: ?KeyPair = None
     var errResult: ?BusinessException = None
-    generator.generateKeyPair({ err, keyPair =>
+    let callback: AsyncCallback<KeyPair> = { err, keyPair =>
         if (let Some(e) <- err) {
             errResult = e
         } else if (let Some(kp) <- keyPair) {
@@ -39,7 +39,8 @@ func awaitGenerateKeyPair(generator: AsyKeyGenerator): KeyPair {
         synchronized(monitor) {
             monitor.notify()
         }
-    })
+    }
+    generator.generateKeyPair(callback)
     synchronized(monitor) {
         monitor.wait(timeout: Duration.second * 10)
     }
@@ -99,7 +100,7 @@ class Test_Asy_Key_Generator_Operations_Add {
             let monitor = Monitor()
             var result: ?KeyPair = None
             var errResult: ?BusinessException = None
-            generator.convertKey({ err, kp =>
+            let callback: AsyncCallback<KeyPair> = { err, kp =>
                 if (let Some(e) <- err) {
                     errResult = e
                 } else if (let Some(k) <- kp) {
@@ -108,7 +109,8 @@ class Test_Asy_Key_Generator_Operations_Add {
                 synchronized(monitor) {
                     monitor.notify()
                 }
-            }, pubKey!: Some(pubEncoded), priKey!: Some(priEncoded))
+            }
+            generator.convertKey(callback, pubKey!: Some(pubEncoded), priKey!: Some(priEncoded))
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -132,14 +134,15 @@ class Test_Asy_Key_Generator_Operations_Add {
         try {
             let monitor = Monitor()
             var errResult: ?BusinessException = None
-            generator.convertKey({ err, _ =>
+            let callback: AsyncCallback<KeyPair> = { err, _ =>
                 if (let Some(e) <- err) {
                     errResult = e
                 }
                 synchronized(monitor) {
                     monitor.notify()
                 }
-            }, pubKey!: None, priKey!: None)
+            }
+            generator.convertKey(callback, pubKey!: None, priKey!: None)
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -167,7 +170,7 @@ class Test_Asy_Key_Generator_Operations_Add {
             let monitor = Monitor()
             var result: ?KeyPair = None
             var errResult: ?BusinessException = None
-            generator.convertPemKey({ err, kp =>
+            let callback: AsyncCallback<KeyPair> = { err, kp =>
                 if (let Some(e) <- err) {
                     errResult = e
                 } else if (let Some(k) <- kp) {
@@ -176,7 +179,8 @@ class Test_Asy_Key_Generator_Operations_Add {
                 synchronized(monitor) {
                     monitor.notify()
                 }
-            }, pubKey!: Some(pubPem), priKey!: Some(priPem))
+            }
+            generator.convertPemKey(callback, pubKey!: Some(pubPem), priKey!: Some(priPem))
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -200,14 +204,15 @@ class Test_Asy_Key_Generator_Operations_Add {
         try {
             let monitor = Monitor()
             var errResult: ?BusinessException = None
-            generator.convertPemKey({ err, _ =>
+            let callback: AsyncCallback<KeyPair> = { err, _ =>
                 if (let Some(e) <- err) {
                     errResult = e
                 }
                 synchronized(monitor) {
                     monitor.notify()
                 }
-            }, pubKey!: Some("invalid pem data"), priKey!: Some("invalid pem data"))
+            }
+            generator.convertPemKey(callback, pubKey!: Some("invalid pem data"), priKey!: Some("invalid pem data"))
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -235,7 +240,7 @@ class Test_Asy_Key_Generator_Operations_Add {
             let monitor = Monitor()
             var result: ?KeyPair = None
             var errResult: ?BusinessException = None
-            generator.convertPemKey("test123", { err, kp =>
+            let callback: AsyncCallback<KeyPair> = { err, kp =>
                 if (let Some(e) <- err) {
                     errResult = e
                 } else if (let Some(k) <- kp) {
@@ -244,7 +249,8 @@ class Test_Asy_Key_Generator_Operations_Add {
                 synchronized(monitor) {
                     monitor.notify()
                 }
-            }, pubKey!: Some(pubPem), priKey!: Some(priPem))
+            }
+            generator.convertPemKey("test123", callback, pubKey!: Some(pubPem), priKey!: Some(priPem))
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
