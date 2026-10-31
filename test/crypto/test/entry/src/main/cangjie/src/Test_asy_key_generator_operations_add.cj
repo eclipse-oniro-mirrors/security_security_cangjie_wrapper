@@ -28,8 +28,8 @@ import ohos.business_exception.*
 
 func awaitGenerateKeyPair(generator: AsyKeyGenerator): KeyPair {
     let monitor = Monitor()
-    let result = Box(None<?KeyPair>)
-    let errResult = Box(None<?BusinessException>)
+    let result = Box(None<KeyPair>)
+    let errResult = Box(None<BusinessException>)
     let callback: AsyncCallback<KeyPair> = { err, keyPair =>
         if (let Some(e) <- err) {
             errResult.value = e
@@ -47,7 +47,7 @@ func awaitGenerateKeyPair(generator: AsyKeyGenerator): KeyPair {
     if (let Some(e) <- errResult.value) {
         throw e
     }
-    return result.value ?? throw Exception("generateKeyPair timeout")
+    return result.value.getOrThrow(() => Exception("generateKeyPair timeout"))
 }
 
 /**
@@ -98,8 +98,8 @@ class Test_Asy_Key_Generator_Operations_Add {
             let priEncoded: DataBlob = keyPair.priKey.getEncoded()
 
             let monitor = Monitor()
-            let result = Box(None<?KeyPair>)
-            let errResult = Box(None<?BusinessException>)
+            let result = Box(None<KeyPair>)
+            let errResult = Box(None<BusinessException>)
             let callback: AsyncCallback<KeyPair> = { err, kp =>
                 if (let Some(e) <- err) {
                     errResult.value = e
@@ -133,7 +133,7 @@ class Test_Asy_Key_Generator_Operations_Add {
 
         try {
             let monitor = Monitor()
-            let errResult = Box(None<?BusinessException>)
+            let errResult = Box(None<BusinessException>)
             let callback: AsyncCallback<KeyPair> = { err, _ =>
                 if (let Some(e) <- err) {
                     errResult.value = e
@@ -168,8 +168,8 @@ class Test_Asy_Key_Generator_Operations_Add {
             let priPem: String = keyPair.priKey.getEncodedPem("PKCS8")
 
             let monitor = Monitor()
-            let result = Box(None<?KeyPair>)
-            let errResult = Box(None<?BusinessException>)
+            let result = Box(None<KeyPair>)
+            let errResult = Box(None<BusinessException>)
             let callback: AsyncCallback<KeyPair> = { err, kp =>
                 if (let Some(e) <- err) {
                     errResult.value = e
@@ -203,7 +203,7 @@ class Test_Asy_Key_Generator_Operations_Add {
 
         try {
             let monitor = Monitor()
-            let errResult = Box(None<?BusinessException>)
+            let errResult = Box(None<BusinessException>)
             let callback: AsyncCallback<KeyPair> = { err, _ =>
                 if (let Some(e) <- err) {
                     errResult.value = e

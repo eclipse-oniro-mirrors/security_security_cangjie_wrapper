@@ -28,7 +28,7 @@ import ohos.business_exception.*
 
 func awaitVerifyInit(verify: Verify, pubKey: PubKey) {
     let monitor = Monitor()
-    let errResult = Box(None<?BusinessException>)
+    let errResult = Box(None<BusinessException>)
     let done = Box(false)
     let callback: AsyncCallback<Unit> = { err, _ =>
         if (let Some(e) <- err) {
@@ -53,7 +53,7 @@ func awaitVerifyInit(verify: Verify, pubKey: PubKey) {
 
 func awaitVerifyUpdate(verify: Verify, data: DataBlob) {
     let monitor = Monitor()
-    let errResult = Box(None<?BusinessException>)
+    let errResult = Box(None<BusinessException>)
     let done = Box(false)
     let callback: AsyncCallback<Unit> = { err, _ =>
         if (let Some(e) <- err) {
@@ -78,8 +78,8 @@ func awaitVerifyUpdate(verify: Verify, data: DataBlob) {
 
 func awaitVerifyResult(verify: Verify, data: DataBlob, sig: DataBlob): Bool {
     let monitor = Monitor()
-    let result = Box(None<?Bool>)
-    let errResult = Box(None<?BusinessException>)
+    let result = Box(None<Bool>)
+    let errResult = Box(None<BusinessException>)
     let callback: AsyncCallback<Bool> = { err, verifyResult =>
         if (let Some(e) <- err) {
             errResult.value = e
@@ -97,7 +97,7 @@ func awaitVerifyResult(verify: Verify, data: DataBlob, sig: DataBlob): Bool {
     if (let Some(e) <- errResult.value) {
         throw e
     }
-    return result.value ?? throw Exception("verify timeout")
+    return result.value.getOrThrow(() => Exception("verify timeout"))
 }
 
 /**
@@ -180,7 +180,7 @@ class Test_Verify_Operations_Add {
 
         try {
             let monitor = Monitor()
-            let errResult = Box(None<?BusinessException>)
+            let errResult = Box(None<BusinessException>)
             let callback: AsyncCallback<Unit> = { err, _ =>
                 if (let Some(e) <- err) {
                     errResult.value = e
@@ -234,7 +234,7 @@ class Test_Verify_Operations_Add {
 
         try {
             let monitor = Monitor()
-            let errResult = Box(None<?BusinessException>)
+            let errResult = Box(None<BusinessException>)
             let callback: AsyncCallback<Bool> = { err, _ =>
                 if (let Some(e) <- err) {
                     errResult.value = e
@@ -271,8 +271,8 @@ class Test_Verify_Operations_Add {
             let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, repeat:0))
 
             let monitor = Monitor()
-            let result = Box(None<?Bool>)
-            let errResult = Box(None<?BusinessException>)
+            let result = Box(None<Bool>)
+            let errResult = Box(None<BusinessException>)
             let callback: AsyncCallback<Bool> = { err, verifyResult =>
                 if (let Some(e) <- err) {
                     errResult.value = e
@@ -313,7 +313,7 @@ class Test_Verify_Operations_Add {
 
             let monitor = Monitor()
             let callbackReceived = Box(false)
-            let errResult = Box(None<?BusinessException>)
+            let errResult = Box(None<BusinessException>)
             let callback: AsyncCallback<Bool> = { err, _ =>
                 if (let Some(e) <- err) {
                     errResult.value = e
@@ -351,7 +351,7 @@ class Test_Verify_Operations_Add {
 
             let monitor = Monitor()
             let callbackReceived = Box(false)
-            let errResult = Box(None<?BusinessException>)
+            let errResult = Box(None<BusinessException>)
             let callback: AsyncCallback<?DataBlob> = { err, _ =>
                 if (let Some(e) <- err) {
                     errResult.value = e
@@ -389,7 +389,7 @@ class Test_Verify_Operations_Add {
 
         try {
             let monitor = Monitor()
-            let errResult = Box(None<?BusinessException>)
+            let errResult = Box(None<BusinessException>)
             let callback: AsyncCallback<?DataBlob> = { err, _ =>
                 if (let Some(e) <- err) {
                     errResult.value = e
@@ -520,8 +520,8 @@ class Test_Verify_Operations_Add {
             let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, repeat:0))
 
             let monitor = Monitor()
-            let result = Box(None<?Bool>)
-            let errResult = Box(None<?BusinessException>)
+            let result = Box(None<Bool>)
+            let errResult = Box(None<BusinessException>)
             let callback: AsyncCallback<Bool> = { err, verifyResult =>
                 if (let Some(e) <- err) {
                     errResult.value = e
