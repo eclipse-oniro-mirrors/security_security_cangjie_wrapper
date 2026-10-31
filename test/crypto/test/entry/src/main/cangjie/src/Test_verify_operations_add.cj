@@ -26,30 +26,6 @@ import std.unittest.common.*
 import std.unittest.testmacro.*
 import ohos.business_exception.*
 
-func awaitGenerateKeyPair(generator: AsyKeyGenerator): KeyPair {
-    let monitor = Monitor()
-    var result: ?KeyPair = None
-    var errResult: ?BusinessException = None
-    let callback: AsyncCallback<KeyPair> = { err, keyPair =>
-        if (let Some(e) <- err) {
-            errResult = e
-        } else if (let Some(kp) <- keyPair) {
-            result = kp
-        }
-        synchronized(monitor) {
-            monitor.notify()
-        }
-    }
-    generator.generateKeyPair(callback)
-    synchronized(monitor) {
-        monitor.wait(timeout: Duration.second * 10)
-    }
-    if (let Some(e) <- errResult) {
-        throw e
-    }
-    return result ?? throw Exception("generateKeyPair timeout")
-}
-
 func awaitVerifyInit(verify: Verify, pubKey: PubKey) {
     let monitor = Monitor()
     var errResult: ?BusinessException = None
@@ -185,7 +161,7 @@ class Test_Verify_Operations_Add {
             let keyPair: KeyPair = awaitGenerateKeyPair(generator)
             let verify: Verify = createVerify("RSA4096|PKCS1|SHA256")
             awaitVerifyInit(verify, keyPair.pubKey)
-            let testData: DataBlob = DataBlob(Array<UInt8>(32, item: 0x41))
+            let testData: DataBlob = DataBlob(Array<UInt8>(32, repeat:0x41))
             awaitVerifyUpdate(verify, testData)
             @Expect(true)
         } catch (e: BusinessException) {
@@ -200,7 +176,7 @@ class Test_Verify_Operations_Add {
     @Tag[APILevel26_1, TestLevel0]
     func test_verify_update_withoutInit() {
         let verify: Verify = createVerify("RSA4096|PKCS1|SHA256")
-        let testData: DataBlob = DataBlob(Array<UInt8>(32, item: 0x41))
+        let testData: DataBlob = DataBlob(Array<UInt8>(32, repeat:0x41))
 
         try {
             let monitor = Monitor()
@@ -237,8 +213,8 @@ class Test_Verify_Operations_Add {
             let keyPair: KeyPair = awaitGenerateKeyPair(generator)
             let verify: Verify = createVerify("RSA4096|PKCS1|SHA256")
             awaitVerifyInit(verify, keyPair.pubKey)
-            let testData: DataBlob = DataBlob(Array<UInt8>(32, item: 0x41))
-            let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, item: 0))
+            let testData: DataBlob = DataBlob(Array<UInt8>(32, repeat:0x41))
+            let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, repeat:0))
             let result: Bool = awaitVerifyResult(verify, testData, fakeSig)
             @Expect(result == false)
         } catch (e: BusinessException) {
@@ -253,8 +229,8 @@ class Test_Verify_Operations_Add {
     @Tag[APILevel26_1, TestLevel0]
     func test_verify_verify_withoutInit() {
         let verify: Verify = createVerify("RSA4096|PKCS1|SHA256")
-        let testData: DataBlob = DataBlob(Array<UInt8>(32, item: 0x41))
-        let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, item: 0))
+        let testData: DataBlob = DataBlob(Array<UInt8>(32, repeat:0x41))
+        let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, repeat:0))
 
         try {
             let monitor = Monitor()
@@ -291,8 +267,8 @@ class Test_Verify_Operations_Add {
             let keyPair: KeyPair = awaitGenerateKeyPair(generator)
             let verify: Verify = createVerify("RSA4096|PKCS1|SHA256")
             awaitVerifyInit(verify, keyPair.pubKey)
-            let testData: DataBlob = DataBlob(Array<UInt8>(32, item: 0x41))
-            let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, item: 0))
+            let testData: DataBlob = DataBlob(Array<UInt8>(32, repeat:0x41))
+            let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, repeat:0))
 
             let monitor = Monitor()
             var result: ?Bool = None
@@ -331,9 +307,9 @@ class Test_Verify_Operations_Add {
             let keyPair: KeyPair = awaitGenerateKeyPair(generator)
             let verify: Verify = createVerify("RSA4096|PKCS1|SHA256")
             awaitVerifyInit(verify, keyPair.pubKey)
-            let testData: DataBlob = DataBlob(Array<UInt8>(32, item: 0x41))
+            let testData: DataBlob = DataBlob(Array<UInt8>(32, repeat:0x41))
             awaitVerifyUpdate(verify, testData)
-            let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, item: 0))
+            let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, repeat:0))
 
             let monitor = Monitor()
             var callbackReceived = false
@@ -347,7 +323,7 @@ class Test_Verify_Operations_Add {
                     monitor.notify()
                 }
             }
-            verify.verify(fakeSig, callback, data: None)
+            verify.verify(fakeSig, callback, data: Option<DataBlob>.None)
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -371,7 +347,7 @@ class Test_Verify_Operations_Add {
             let keyPair: KeyPair = awaitGenerateKeyPair(generator)
             let verify: Verify = createVerify("RSA4096|PKCS1|SHA256")
             awaitVerifyInit(verify, keyPair.pubKey)
-            let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, item: 0))
+            let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, repeat:0))
 
             let monitor = Monitor()
             var callbackReceived = false
@@ -409,7 +385,7 @@ class Test_Verify_Operations_Add {
         let keyPair: KeyPair = awaitGenerateKeyPair(generator)
         let verify: Verify = createVerify("ECC256|SHA256")
         awaitVerifyInit(verify, keyPair.pubKey)
-        let fakeSig: DataBlob = DataBlob(Array<UInt8>(64, item: 0))
+        let fakeSig: DataBlob = DataBlob(Array<UInt8>(64, repeat:0))
 
         try {
             let monitor = Monitor()
@@ -537,11 +513,11 @@ class Test_Verify_Operations_Add {
             let keyPair: KeyPair = awaitGenerateKeyPair(generator)
             let verify: Verify = createVerify("RSA4096|PKCS1|SHA256")
             awaitVerifyInit(verify, keyPair.pubKey)
-            let chunk1: DataBlob = DataBlob(Array<UInt8>(32, item: 0x41))
-            let chunk2: DataBlob = DataBlob(Array<UInt8>(32, item: 0x42))
+            let chunk1: DataBlob = DataBlob(Array<UInt8>(32, repeat:0x41))
+            let chunk2: DataBlob = DataBlob(Array<UInt8>(32, repeat:0x42))
             awaitVerifyUpdate(verify, chunk1)
             awaitVerifyUpdate(verify, chunk2)
-            let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, item: 0))
+            let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, repeat:0))
 
             let monitor = Monitor()
             var result: ?Bool = None
@@ -556,7 +532,7 @@ class Test_Verify_Operations_Add {
                     monitor.notify()
                 }
             }
-            verify.verify(fakeSig, callback, data: None)
+            verify.verify(fakeSig, callback, data: Option<DataBlob>.None)
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }

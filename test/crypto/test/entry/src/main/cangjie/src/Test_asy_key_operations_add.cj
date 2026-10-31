@@ -26,30 +26,6 @@ import std.unittest.common.*
 import std.unittest.testmacro.*
 import ohos.business_exception.*
 
-func awaitGenerateKeyPair(generator: AsyKeyGenerator): KeyPair {
-    let monitor = Monitor()
-    var result: ?KeyPair = None
-    var errResult: ?BusinessException = None
-    let callback: AsyncCallback<KeyPair> = { err, keyPair =>
-        if (let Some(e) <- err) {
-            errResult = e
-        } else if (let Some(kp) <- keyPair) {
-            result = kp
-        }
-        synchronized(monitor) {
-            monitor.notify()
-        }
-    }
-    generator.generateKeyPair(callback)
-    synchronized(monitor) {
-        monitor.wait(timeout: Duration.second * 10)
-    }
-    if (let Some(e) <- errResult) {
-        throw e
-    }
-    return result ?? throw Exception("generateKeyPair timeout")
-}
-
 /**
  * 测试ohos.crypto_framework模块的PriKey、PubKey、KeyPair类操作功能
  */

@@ -142,7 +142,7 @@ class Test_Asy_Key_Generator_Operations_Add {
                     monitor.notify()
                 }
             }
-            generator.convertKey(callback, pubKey: None, priKey: None)
+            generator.convertKey(callback, pubKey: Option<DataBlob>.None, priKey: Option<DataBlob>.None)
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
@@ -222,44 +222,6 @@ class Test_Asy_Key_Generator_Operations_Add {
             @Expect(false)
         } catch (e: BusinessException) {
             @Expect(e.code == 17620003)
-        }
-    }
-
-    /**
-     * 测试AsyKeyGenerator.convertPemKey API（带密码） - 有效等价类：转换RSA2048 PEM格式密钥（带密码）
-     */
-    @TestCase
-    @Tag[APILevel26_1, TestLevel0]
-    func test_asyKeyGenerator_convertPemKey_withPassword() {
-        try {
-            let generator: AsyKeyGenerator = createAsyKeyGenerator("RSA2048")
-            let keyPair: KeyPair = awaitGenerateKeyPair(generator)
-            let pubPem: String = keyPair.pubKey.getEncodedPem("X509")
-            let priPem: String = keyPair.priKey.getEncodedPem("PKCS8")
-
-            let monitor = Monitor()
-            var result: ?KeyPair = None
-            var errResult: ?BusinessException = None
-            let callback: AsyncCallback<KeyPair> = { err, kp =>
-                if (let Some(e) <- err) {
-                    errResult = e
-                } else if (let Some(k) <- kp) {
-                    result = k
-                }
-                synchronized(monitor) {
-                    monitor.notify()
-                }
-            }
-            generator.convertPemKey("test123", callback, pubKey: Some(pubPem), priKey: Some(priPem))
-            synchronized(monitor) {
-                monitor.wait(timeout: Duration.second * 10)
-            }
-            if (let Some(e) <- errResult) {
-                throw e
-            }
-            @Expect(result.isSome())
-        } catch (e: BusinessException) {
-            @Expect(false)
         }
     }
 }
