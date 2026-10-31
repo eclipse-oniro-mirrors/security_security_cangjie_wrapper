@@ -28,13 +28,13 @@ import ohos.business_exception.*
 
 func awaitVerifyInit(verify: Verify, pubKey: PubKey) {
     let monitor = Monitor()
-    var errResult: ?BusinessException = None
-    var done = false
+    let errResult = Box(None<?BusinessException>)
+    let done = Box(false)
     let callback: AsyncCallback<Unit> = { err, _ =>
         if (let Some(e) <- err) {
-            errResult = e
+            errResult.value = e
         }
-        done = true
+        done.value = true
         synchronized(monitor) {
             monitor.notify()
         }
@@ -43,23 +43,23 @@ func awaitVerifyInit(verify: Verify, pubKey: PubKey) {
     synchronized(monitor) {
         monitor.wait(timeout: Duration.second * 10)
     }
-    if (let Some(e) <- errResult) {
+    if (let Some(e) <- errResult.value) {
         throw e
     }
-    if (!done) {
+    if (!done.value) {
         throw Exception("verify initialize timeout")
     }
 }
 
 func awaitVerifyUpdate(verify: Verify, data: DataBlob) {
     let monitor = Monitor()
-    var errResult: ?BusinessException = None
-    var done = false
+    let errResult = Box(None<?BusinessException>)
+    let done = Box(false)
     let callback: AsyncCallback<Unit> = { err, _ =>
         if (let Some(e) <- err) {
-            errResult = e
+            errResult.value = e
         }
-        done = true
+        done.value = true
         synchronized(monitor) {
             monitor.notify()
         }
@@ -68,23 +68,23 @@ func awaitVerifyUpdate(verify: Verify, data: DataBlob) {
     synchronized(monitor) {
         monitor.wait(timeout: Duration.second * 10)
     }
-    if (let Some(e) <- errResult) {
+    if (let Some(e) <- errResult.value) {
         throw e
     }
-    if (!done) {
+    if (!done.value) {
         throw Exception("verify update timeout")
     }
 }
 
 func awaitVerifyResult(verify: Verify, data: DataBlob, sig: DataBlob): Bool {
     let monitor = Monitor()
-    var result: ?Bool = None
-    var errResult: ?BusinessException = None
+    let result = Box(None<?Bool>)
+    let errResult = Box(None<?BusinessException>)
     let callback: AsyncCallback<Bool> = { err, verifyResult =>
         if (let Some(e) <- err) {
-            errResult = e
+            errResult.value = e
         } else if (let Some(r) <- verifyResult) {
-            result = r
+            result.value = r
         }
         synchronized(monitor) {
             monitor.notify()
@@ -94,10 +94,10 @@ func awaitVerifyResult(verify: Verify, data: DataBlob, sig: DataBlob): Bool {
     synchronized(monitor) {
         monitor.wait(timeout: Duration.second * 10)
     }
-    if (let Some(e) <- errResult) {
+    if (let Some(e) <- errResult.value) {
         throw e
     }
-    return result ?? throw Exception("verify timeout")
+    return result.value ?? throw Exception("verify timeout")
 }
 
 /**
@@ -180,10 +180,10 @@ class Test_Verify_Operations_Add {
 
         try {
             let monitor = Monitor()
-            var errResult: ?BusinessException = None
+            let errResult = Box(None<?BusinessException>)
             let callback: AsyncCallback<Unit> = { err, _ =>
                 if (let Some(e) <- err) {
-                    errResult = e
+                    errResult.value = e
                 }
                 synchronized(monitor) {
                     monitor.notify()
@@ -193,7 +193,7 @@ class Test_Verify_Operations_Add {
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
-            if (let Some(e) <- errResult) {
+            if (let Some(e) <- errResult.value) {
                 throw e
             }
             @Expect(false)
@@ -234,10 +234,10 @@ class Test_Verify_Operations_Add {
 
         try {
             let monitor = Monitor()
-            var errResult: ?BusinessException = None
+            let errResult = Box(None<?BusinessException>)
             let callback: AsyncCallback<Bool> = { err, _ =>
                 if (let Some(e) <- err) {
-                    errResult = e
+                    errResult.value = e
                 }
                 synchronized(monitor) {
                     monitor.notify()
@@ -247,7 +247,7 @@ class Test_Verify_Operations_Add {
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
-            if (let Some(e) <- errResult) {
+            if (let Some(e) <- errResult.value) {
                 throw e
             }
             @Expect(false)
@@ -271,13 +271,13 @@ class Test_Verify_Operations_Add {
             let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, repeat:0))
 
             let monitor = Monitor()
-            var result: ?Bool = None
-            var errResult: ?BusinessException = None
+            let result = Box(None<?Bool>)
+            let errResult = Box(None<?BusinessException>)
             let callback: AsyncCallback<Bool> = { err, verifyResult =>
                 if (let Some(e) <- err) {
-                    errResult = e
+                    errResult.value = e
                 } else if (let Some(r) <- verifyResult) {
-                    result = r
+                    result.value = r
                 }
                 synchronized(monitor) {
                     monitor.notify()
@@ -287,10 +287,10 @@ class Test_Verify_Operations_Add {
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
-            if (let Some(e) <- errResult) {
+            if (let Some(e) <- errResult.value) {
                 throw e
             }
-            @Expect(result ?? false == false)
+            @Expect(result.value ?? false == false)
         } catch (e: BusinessException) {
             @Expect(false)
         }
@@ -312,13 +312,13 @@ class Test_Verify_Operations_Add {
             let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, repeat:0))
 
             let monitor = Monitor()
-            var callbackReceived = false
-            var errResult: ?BusinessException = None
+            let callbackReceived = Box(false)
+            let errResult = Box(None<?BusinessException>)
             let callback: AsyncCallback<Bool> = { err, _ =>
                 if (let Some(e) <- err) {
-                    errResult = e
+                    errResult.value = e
                 }
-                callbackReceived = true
+                callbackReceived.value = true
                 synchronized(monitor) {
                     monitor.notify()
                 }
@@ -327,10 +327,10 @@ class Test_Verify_Operations_Add {
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
-            if (let Some(e) <- errResult) {
+            if (let Some(e) <- errResult.value) {
                 throw e
             }
-            @Expect(callbackReceived)
+            @Expect(callbackReceived.value)
         } catch (e: BusinessException) {
             @Expect(false)
         }
@@ -350,13 +350,13 @@ class Test_Verify_Operations_Add {
             let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, repeat:0))
 
             let monitor = Monitor()
-            var callbackReceived = false
-            var errResult: ?BusinessException = None
-            let callback: AsyncCallback<DataBlob> = { err, _ =>
+            let callbackReceived = Box(false)
+            let errResult = Box(None<?BusinessException>)
+            let callback: AsyncCallback<?DataBlob> = { err, _ =>
                 if (let Some(e) <- err) {
-                    errResult = e
+                    errResult.value = e
                 }
-                callbackReceived = true
+                callbackReceived.value = true
                 synchronized(monitor) {
                     monitor.notify()
                 }
@@ -365,11 +365,11 @@ class Test_Verify_Operations_Add {
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
-            if (let Some(e) <- errResult) {
+            if (let Some(e) <- errResult.value) {
                 throw e
             }
             // recover可能返回None或抛出异常，只要回调被调用即验证成功
-            @Expect(callbackReceived)
+            @Expect(callbackReceived.value)
         } catch (e: BusinessException) {
             @Expect(false)
         }
@@ -389,10 +389,10 @@ class Test_Verify_Operations_Add {
 
         try {
             let monitor = Monitor()
-            var errResult: ?BusinessException = None
-            let callback: AsyncCallback<DataBlob> = { err, _ =>
+            let errResult = Box(None<?BusinessException>)
+            let callback: AsyncCallback<?DataBlob> = { err, _ =>
                 if (let Some(e) <- err) {
-                    errResult = e
+                    errResult.value = e
                 }
                 synchronized(monitor) {
                     monitor.notify()
@@ -402,7 +402,7 @@ class Test_Verify_Operations_Add {
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
-            if (let Some(e) <- errResult) {
+            if (let Some(e) <- errResult.value) {
                 throw e
             }
             @Expect(false)
@@ -520,13 +520,13 @@ class Test_Verify_Operations_Add {
             let fakeSig: DataBlob = DataBlob(Array<UInt8>(512, repeat:0))
 
             let monitor = Monitor()
-            var result: ?Bool = None
-            var errResult: ?BusinessException = None
+            let result = Box(None<?Bool>)
+            let errResult = Box(None<?BusinessException>)
             let callback: AsyncCallback<Bool> = { err, verifyResult =>
                 if (let Some(e) <- err) {
-                    errResult = e
+                    errResult.value = e
                 } else if (let Some(r) <- verifyResult) {
-                    result = r
+                    result.value = r
                 }
                 synchronized(monitor) {
                     monitor.notify()
@@ -536,10 +536,10 @@ class Test_Verify_Operations_Add {
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
-            if (let Some(e) <- errResult) {
+            if (let Some(e) <- errResult.value) {
                 throw e
             }
-            @Expect(result ?? false == false)
+            @Expect(result.value ?? false == false)
         } catch (e: BusinessException) {
             @Expect(false)
         }

@@ -28,13 +28,13 @@ import ohos.business_exception.*
 
 func awaitGenerateKeyPair(generator: AsyKeyGenerator): KeyPair {
     let monitor = Monitor()
-    var result: ?KeyPair = None
-    var errResult: ?BusinessException = None
+    let result = Box(None<?KeyPair>)
+    let errResult = Box(None<?BusinessException>)
     let callback: AsyncCallback<KeyPair> = { err, keyPair =>
         if (let Some(e) <- err) {
-            errResult = e
+            errResult.value = e
         } else if (let Some(kp) <- keyPair) {
-            result = kp
+            result.value = kp
         }
         synchronized(monitor) {
             monitor.notify()
@@ -44,10 +44,10 @@ func awaitGenerateKeyPair(generator: AsyKeyGenerator): KeyPair {
     synchronized(monitor) {
         monitor.wait(timeout: Duration.second * 10)
     }
-    if (let Some(e) <- errResult) {
+    if (let Some(e) <- errResult.value) {
         throw e
     }
-    return result ?? throw Exception("generateKeyPair timeout")
+    return result.value ?? throw Exception("generateKeyPair timeout")
 }
 
 /**
@@ -98,13 +98,13 @@ class Test_Asy_Key_Generator_Operations_Add {
             let priEncoded: DataBlob = keyPair.priKey.getEncoded()
 
             let monitor = Monitor()
-            var result: ?KeyPair = None
-            var errResult: ?BusinessException = None
+            let result = Box(None<?KeyPair>)
+            let errResult = Box(None<?BusinessException>)
             let callback: AsyncCallback<KeyPair> = { err, kp =>
                 if (let Some(e) <- err) {
-                    errResult = e
+                    errResult.value = e
                 } else if (let Some(k) <- kp) {
-                    result = k
+                    result.value = k
                 }
                 synchronized(monitor) {
                     monitor.notify()
@@ -114,10 +114,10 @@ class Test_Asy_Key_Generator_Operations_Add {
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
-            if (let Some(e) <- errResult) {
+            if (let Some(e) <- errResult.value) {
                 throw e
             }
-            @Expect(result.isSome())
+            @Expect(result.value.isSome())
         } catch (e: BusinessException) {
             @Expect(false)
         }
@@ -133,10 +133,10 @@ class Test_Asy_Key_Generator_Operations_Add {
 
         try {
             let monitor = Monitor()
-            var errResult: ?BusinessException = None
+            let errResult = Box(None<?BusinessException>)
             let callback: AsyncCallback<KeyPair> = { err, _ =>
                 if (let Some(e) <- err) {
-                    errResult = e
+                    errResult.value = e
                 }
                 synchronized(monitor) {
                     monitor.notify()
@@ -146,7 +146,7 @@ class Test_Asy_Key_Generator_Operations_Add {
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
-            if (let Some(e) <- errResult) {
+            if (let Some(e) <- errResult.value) {
                 throw e
             }
             @Expect(false)
@@ -168,13 +168,13 @@ class Test_Asy_Key_Generator_Operations_Add {
             let priPem: String = keyPair.priKey.getEncodedPem("PKCS8")
 
             let monitor = Monitor()
-            var result: ?KeyPair = None
-            var errResult: ?BusinessException = None
+            let result = Box(None<?KeyPair>)
+            let errResult = Box(None<?BusinessException>)
             let callback: AsyncCallback<KeyPair> = { err, kp =>
                 if (let Some(e) <- err) {
-                    errResult = e
+                    errResult.value = e
                 } else if (let Some(k) <- kp) {
-                    result = k
+                    result.value = k
                 }
                 synchronized(monitor) {
                     monitor.notify()
@@ -184,10 +184,10 @@ class Test_Asy_Key_Generator_Operations_Add {
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
-            if (let Some(e) <- errResult) {
+            if (let Some(e) <- errResult.value) {
                 throw e
             }
-            @Expect(result.isSome())
+            @Expect(result.value.isSome())
         } catch (e: BusinessException) {
             @Expect(false)
         }
@@ -203,10 +203,10 @@ class Test_Asy_Key_Generator_Operations_Add {
 
         try {
             let monitor = Monitor()
-            var errResult: ?BusinessException = None
+            let errResult = Box(None<?BusinessException>)
             let callback: AsyncCallback<KeyPair> = { err, _ =>
                 if (let Some(e) <- err) {
-                    errResult = e
+                    errResult.value = e
                 }
                 synchronized(monitor) {
                     monitor.notify()
@@ -216,7 +216,7 @@ class Test_Asy_Key_Generator_Operations_Add {
             synchronized(monitor) {
                 monitor.wait(timeout: Duration.second * 10)
             }
-            if (let Some(e) <- errResult) {
+            if (let Some(e) <- errResult.value) {
                 throw e
             }
             @Expect(false)
