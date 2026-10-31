@@ -97,7 +97,10 @@ func awaitVerifyResult(verify: Verify, data: DataBlob, sig: DataBlob): Bool {
     if (let Some(e) <- errResult.value) {
         throw e
     }
-    return result.value.getOrThrow(() => Exception("verify timeout"))
+    match (result.value) {
+        case Some(r) => return r
+        case None => throw Exception("verify timeout")
+    }
 }
 
 /**

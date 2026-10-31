@@ -47,7 +47,10 @@ func awaitGenerateKeyPair(generator: AsyKeyGenerator): KeyPair {
     if (let Some(e) <- errResult.value) {
         throw e
     }
-    return result.value.getOrThrow(() => Exception("generateKeyPair timeout"))
+    match (result.value) {
+        case Some(kp) => return kp
+        case None => throw Exception("generateKeyPair timeout")
+    }
 }
 
 /**
