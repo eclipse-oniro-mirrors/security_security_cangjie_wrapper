@@ -32,67 +32,91 @@ import ohos.business_exception.*
 @Test
 class Test_Create_Asy_Key_Generator_Add {
     /**
-     * 测试createAsyKeyGenerator API - 有效等价类：创建RSA密钥生成器
+     * 测试createAsyKeyGenerator API - 有效等价类：创建RSA2048非对称密钥生成器
      */
     @TestCase
     @Tag[APILevel26_1, TestLevel0]
-    func test_createAsyKeyGenerator_RSA4096() {
-        let generator: AsyKeyGenerator = createAsyKeyGenerator("RSA4096")
-        @Expect(generator.algName == "RSA4096")
+    func test_createAsyKeyGenerator_RSA2048() {
+        try {
+            let generator: AsyKeyGenerator = createAsyKeyGenerator("RSA2048")
+            @Expect(generator.algName == "RSA2048")
+        } catch (e: BusinessException) {
+            @Expect(false)
+        }
     }
 
     /**
-     * 测试createAsyKeyGenerator API - 有效等价类：创建ECC密钥生成器
+     * 测试createAsyKeyGenerator API - 有效等价类：创建ECC256非对称密钥生成器
      */
     @TestCase
     @Tag[APILevel26_1, TestLevel0]
     func test_createAsyKeyGenerator_ECC256() {
-        let generator: AsyKeyGenerator = createAsyKeyGenerator("ECC256")
-        @Expect(generator.algName == "ECC256")
+        try {
+            let generator: AsyKeyGenerator = createAsyKeyGenerator("ECC256")
+            @Expect(generator.algName == "ECC256")
+        } catch (e: BusinessException) {
+            @Expect(false)
+        }
     }
 
     /**
-     * 测试createAsyKeyGenerator API - 有效等价类：创建Ed25519密钥生成器
-     */
-    @TestCase
-    @Tag[APILevel26_1, TestLevel0]
-    func test_createAsyKeyGenerator_Ed25519() {
-        let generator: AsyKeyGenerator = createAsyKeyGenerator("Ed25519")
-        @Expect(generator.algName == "Ed25519")
-    }
-
-    /**
-     * 测试createAsyKeyGenerator API - 有效等价类：创建X25519密钥生成器
-     */
-    @TestCase
-    @Tag[APILevel26_1, TestLevel0]
-    func test_createAsyKeyGenerator_X25519() {
-        let generator: AsyKeyGenerator = createAsyKeyGenerator("X25519")
-        @Expect(generator.algName == "X25519")
-    }
-
-    /**
-     * 测试createAsyKeyGenerator API - 有效等价类：创建SM2密钥生成器
+     * 测试createAsyKeyGenerator API - 有效等价类：创建SM2非对称密钥生成器
      */
     @TestCase
     @Tag[APILevel26_1, TestLevel0]
     func test_createAsyKeyGenerator_SM2() {
-        let generator: AsyKeyGenerator = createAsyKeyGenerator("SM2")
-        @Expect(generator.algName == "SM2")
+        try {
+            let generator: AsyKeyGenerator = createAsyKeyGenerator("SM2")
+            @Expect(generator.algName == "SM2")
+        } catch (e: BusinessException) {
+            @Expect(false)
+        }
     }
 
     /**
-     * 测试createAsyKeyGenerator API - 有效等价类：创建DSA密钥生成器
+     * 测试createAsyKeyGenerator API - 有效等价类：创建Ed25519非对称密钥生成器
+     */
+    @TestCase
+    @Tag[APILevel26_1, TestLevel0]
+    func test_createAsyKeyGenerator_Ed25519() {
+        try {
+            let generator: AsyKeyGenerator = createAsyKeyGenerator("Ed25519")
+            @Expect(generator.algName == "Ed25519")
+        } catch (e: BusinessException) {
+            @Expect(false)
+        }
+    }
+
+    /**
+     * 测试createAsyKeyGenerator API - 有效等价类：创建X25519非对称密钥生成器
+     */
+    @TestCase
+    @Tag[APILevel26_1, TestLevel0]
+    func test_createAsyKeyGenerator_X25519() {
+        try {
+            let generator: AsyKeyGenerator = createAsyKeyGenerator("X25519")
+            @Expect(generator.algName == "X25519")
+        } catch (e: BusinessException) {
+            @Expect(false)
+        }
+    }
+
+    /**
+     * 测试createAsyKeyGenerator API - 有效等价类：创建DSA2048非对称密钥生成器
      */
     @TestCase
     @Tag[APILevel26_1, TestLevel0]
     func test_createAsyKeyGenerator_DSA2048() {
-        let generator: AsyKeyGenerator = createAsyKeyGenerator("DSA2048")
-        @Expect(generator.algName == "DSA2048")
+        try {
+            let generator: AsyKeyGenerator = createAsyKeyGenerator("DSA2048")
+            @Expect(generator.algName == "DSA2048")
+        } catch (e: BusinessException) {
+            @Expect(false)
+        }
     }
 
     /**
-     * 测试createAsyKeyGenerator API - 无效等价类：空算法名称
+     * 测试createAsyKeyGenerator API - 异常：空算法名称，错误码801或17620001
      */
     @TestCase
     @Tag[APILevel26_1, TestLevel0]
@@ -101,12 +125,12 @@ class Test_Create_Asy_Key_Generator_Add {
             createAsyKeyGenerator("")
             @Expect(false)
         } catch (e: BusinessException) {
-            @Expect(true)
+            @Expect(e.code == 801 || e.code == 17620001)
         }
     }
 
     /**
-     * 测试createAsyKeyGenerator API - 无效等价类：无效的算法名称
+     * 测试createAsyKeyGenerator API - 异常：无效的算法名称，错误码801或17620001
      */
     @TestCase
     @Tag[APILevel26_1, TestLevel0]
@@ -115,52 +139,96 @@ class Test_Create_Asy_Key_Generator_Add {
             createAsyKeyGenerator("INVALID_ALG")
             @Expect(false)
         } catch (e: BusinessException) {
-            @Expect(true)
+            @Expect(e.code == 801 || e.code == 17620001)
         }
     }
 
     /**
-     * 测试createVerify API - 有效等价类：创建RSA验签器
+     * 测试createVerify API - 有效等价类：创建RSA2048|PKCS1|SHA256验签实例
      */
     @TestCase
     @Tag[APILevel26_1, TestLevel0]
-    func test_createVerify_RSA4096() {
-        let verify: Verify = createVerify("RSA4096|PKCS1|SHA256")
-        @Expect(verify.algName == "RSA4096|PKCS1|SHA256")
+    func test_createVerify_RSA2048_PKCS1_SHA256() {
+        try {
+            let verify: Verify = createVerify("RSA2048|PKCS1|SHA256")
+            @Expect(verify.algName == "RSA2048|PKCS1|SHA256")
+        } catch (e: BusinessException) {
+            @Expect(false)
+        }
     }
 
     /**
-     * 测试createVerify API - 有效等价类：创建ECC验签器
+     * 测试createVerify API - 有效等价类：创建RSA2048|PSS|SHA256|MGF1_SHA256验签实例
      */
     @TestCase
     @Tag[APILevel26_1, TestLevel0]
-    func test_createVerify_ECC256() {
-        let verify: Verify = createVerify("ECC256|SHA256")
-        @Expect(verify.algName == "ECC256|SHA256")
+    func test_createVerify_RSA2048_PSS_SHA256() {
+        try {
+            let verify: Verify = createVerify("RSA2048|PSS|SHA256|MGF1_SHA256")
+            @Expect(verify.algName == "RSA2048|PSS|SHA256|MGF1_SHA256")
+        } catch (e: BusinessException) {
+            @Expect(false)
+        }
     }
 
     /**
-     * 测试createVerify API - 有效等价类：创建Ed25519验签器
+     * 测试createVerify API - 有效等价类：创建ECC256|SHA256验签实例
+     */
+    @TestCase
+    @Tag[APILevel26_1, TestLevel0]
+    func test_createVerify_ECC256_SHA256() {
+        try {
+            let verify: Verify = createVerify("ECC256|SHA256")
+            @Expect(verify.algName == "ECC256|SHA256")
+        } catch (e: BusinessException) {
+            @Expect(false)
+        }
+    }
+
+    /**
+     * 测试createVerify API - 有效等价类：创建SM2|SM3验签实例
+     */
+    @TestCase
+    @Tag[APILevel26_1, TestLevel0]
+    func test_createVerify_SM2_SM3() {
+        try {
+            let verify: Verify = createVerify("SM2|SM3")
+            @Expect(verify.algName == "SM2|SM3")
+        } catch (e: BusinessException) {
+            @Expect(false)
+        }
+    }
+
+    /**
+     * 测试createVerify API - 有效等价类：创建Ed25519验签实例
      */
     @TestCase
     @Tag[APILevel26_1, TestLevel0]
     func test_createVerify_Ed25519() {
-        let verify: Verify = createVerify("Ed25519")
-        @Expect(verify.algName == "Ed25519")
+        try {
+            let verify: Verify = createVerify("Ed25519")
+            @Expect(verify.algName == "Ed25519")
+        } catch (e: BusinessException) {
+            @Expect(false)
+        }
     }
 
     /**
-     * 测试createVerify API - 有效等价类：创建SM2验签器
+     * 测试createVerify API - 有效等价类：创建DSA2048|SHA256验签实例
      */
     @TestCase
     @Tag[APILevel26_1, TestLevel0]
-    func test_createVerify_SM2() {
-        let verify: Verify = createVerify("SM2|SM3")
-        @Expect(verify.algName == "SM2|SM3")
+    func test_createVerify_DSA2048_SHA256() {
+        try {
+            let verify: Verify = createVerify("DSA2048|SHA256")
+            @Expect(verify.algName == "DSA2048|SHA256")
+        } catch (e: BusinessException) {
+            @Expect(false)
+        }
     }
 
     /**
-     * 测试createVerify API - 无效等价类：空算法名称
+     * 测试createVerify API - 异常：空算法名称，错误码801或17620001
      */
     @TestCase
     @Tag[APILevel26_1, TestLevel0]
@@ -169,12 +237,12 @@ class Test_Create_Asy_Key_Generator_Add {
             createVerify("")
             @Expect(false)
         } catch (e: BusinessException) {
-            @Expect(true)
+            @Expect(e.code == 801 || e.code == 17620001)
         }
     }
 
     /**
-     * 测试createVerify API - 无效等价类：无效的算法名称
+     * 测试createVerify API - 异常：无效的算法名称，错误码801或17620001
      */
     @TestCase
     @Tag[APILevel26_1, TestLevel0]
@@ -183,7 +251,7 @@ class Test_Create_Asy_Key_Generator_Add {
             createVerify("INVALID_ALG")
             @Expect(false)
         } catch (e: BusinessException) {
-            @Expect(true)
+            @Expect(e.code == 801 || e.code == 17620001)
         }
     }
 }
