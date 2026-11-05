@@ -19,6 +19,7 @@ package ohos.security.crypto_framework
 
 import ohos.labels.APILevel
 import std.math.numeric.BigInt
+import std.deriving.Derive
 
 /**
  * Enum for signature verification parameters, which can be set by using setVerifySpec, and obtained by using
@@ -26,7 +27,7 @@ import std.math.numeric.BigInt
  *
  * Currently, only RSA and SM2 are supported.
  */
-@Derive[ToString, Equatable<SignSpecItem>]
+@Derive[ToString, Equatable]
 @!APILevel[
     since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Signature"
@@ -148,7 +149,7 @@ public enum SignSpecItem {
 /**
  * Enumerates the asymmetric key parameters.
  */
-@Derive[ToString, Equatable<AsyKeySpecItem>]
+@Derive[ToString, Equatable]
 @!APILevel[
     since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
@@ -466,7 +467,7 @@ public enum AsyKeySpecItem {
     }
 }
 
-@Derive[ToString, Equatable<ResultSpec>]
+@Derive[ToString, Equatable]
 @!APILevel[
     since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework"

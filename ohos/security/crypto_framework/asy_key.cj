@@ -262,6 +262,10 @@ public class PriKey <: Key {
             checkAndThrow(errCode)
         }
     }
+
+    func getId(): Int64 {
+        impl.getId()
+    }
 }
 
 class PriKeyImpl <: RemoteDataLite {
@@ -481,6 +485,10 @@ public class PubKey <: Key {
             checkAndThrow(errCode)
             return PubKey(PubKeyImpl(id, CString(retString).toString()))
         }
+    }
+
+    func getId(): Int64 {
+        impl.getId()
     }
 }
 
