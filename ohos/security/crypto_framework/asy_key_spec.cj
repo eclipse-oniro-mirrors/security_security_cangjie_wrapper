@@ -443,6 +443,14 @@ private func asyKeySpecItemValue(item: AsyKeySpecItem): Int32 {
 }
 
 private func asyKeySpecItemKey(item: AsyKeySpecItem): String {
+    let key = asyKeySpecItemKeyPart1(item)
+    if (key != "") {
+        return key
+    }
+    return asyKeySpecItemKeyPart2(item)
+}
+
+private func asyKeySpecItemKeyPart1(item: AsyKeySpecItem): String {
     match (item) {
         case DsaPBn => "DsaPBn"
         case DsaQBn => "DsaQBn"
@@ -464,6 +472,12 @@ private func asyKeySpecItemKey(item: AsyKeySpecItem): String {
         case EccCurveNameStr => "EccCurveNameStr"
         case RsaNBn => "RsaNBn"
         case RsaSkBn => "RsaSkBn"
+        case _ => ""
+    }
+}
+
+private func asyKeySpecItemKeyPart2(item: AsyKeySpecItem): String {
+    match (item) {
         case RsaPkBn => "RsaPkBn"
         case DhPBn => "DhPBn"
         case DhGBn => "DhGBn"
