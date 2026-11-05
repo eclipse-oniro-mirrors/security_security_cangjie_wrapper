@@ -443,53 +443,22 @@ private func asyKeySpecItemValue(item: AsyKeySpecItem): Int32 {
 }
 
 private func asyKeySpecItemKey(item: AsyKeySpecItem): String {
-    let key = asyKeySpecItemKeyPart1(item)
-    if (key != "") {
-        return key
+    let keys = [
+        "DsaPBn", "DsaQBn", "DsaGBn", "DsaSkBn", "DsaPkBn",
+        "EccFpPBn", "EccABn", "EccBBn", "EccGXBn", "EccGYBn",
+        "EccNBn", "EccHNum", "EccSkBn", "EccPkXBn", "EccPkYBn",
+        "EccFieldTypeStr", "EccFieldSizeNum", "EccCurveNameStr",
+        "RsaNBn", "RsaSkBn", "RsaPkBn",
+        "DhPBn", "DhGBn", "DhLNum", "DhSkBn", "DhPkBn",
+        "Ed25519SkBn", "Ed25519PkBn",
+        "X25519SkBn", "X25519PkBn"
+    ]
+    for (key in keys) {
+        if (key == item.toString()) {
+            return key
+        }
     }
-    return asyKeySpecItemKeyPart2(item)
-}
-
-private func asyKeySpecItemKeyPart1(item: AsyKeySpecItem): String {
-    match (item) {
-        case DsaPBn => "DsaPBn"
-        case DsaQBn => "DsaQBn"
-        case DsaGBn => "DsaGBn"
-        case DsaSkBn => "DsaSkBn"
-        case DsaPkBn => "DsaPkBn"
-        case EccFpPBn => "EccFpPBn"
-        case EccABn => "EccABn"
-        case EccBBn => "EccBBn"
-        case EccGXBn => "EccGXBn"
-        case EccGYBn => "EccGYBn"
-        case EccNBn => "EccNBn"
-        case EccHNum => "EccHNum"
-        case EccSkBn => "EccSkBn"
-        case EccPkXBn => "EccPkXBn"
-        case EccPkYBn => "EccPkYBn"
-        case EccFieldTypeStr => "EccFieldTypeStr"
-        case EccFieldSizeNum => "EccFieldSizeNum"
-        case EccCurveNameStr => "EccCurveNameStr"
-        case RsaNBn => "RsaNBn"
-        case RsaSkBn => "RsaSkBn"
-        case _ => ""
-    }
-}
-
-private func asyKeySpecItemKeyPart2(item: AsyKeySpecItem): String {
-    match (item) {
-        case RsaPkBn => "RsaPkBn"
-        case DhPBn => "DhPBn"
-        case DhGBn => "DhGBn"
-        case DhLNum => "DhLNum"
-        case DhSkBn => "DhSkBn"
-        case DhPkBn => "DhPkBn"
-        case Ed25519SkBn => "Ed25519SkBn"
-        case Ed25519PkBn => "Ed25519PkBn"
-        case X25519SkBn => "X25519SkBn"
-        case X25519PkBn => "X25519PkBn"
-        case _ => ""
-    }
+    return ""
 }
 
 private func asyKeySpecItemValueMap(): HashMap<String, Int32> {
