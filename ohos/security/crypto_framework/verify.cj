@@ -244,10 +244,7 @@ public class Verify {
                 callback(err, None)
             } finally {
                 unsafe {
-                    if (dataBlob.isNotNull()) {
-                        dataBlob.read().free()
-                        LibC.free(dataBlob)
-                    }
+                    freeBlobPtr(dataBlob)
                     sigBlob.free()
                 }
             }
@@ -282,12 +279,12 @@ public class Verify {
                     input = HcfBlob(signatureData)
                     let errCode = FFiOHOSVerifyRecover(impl.getId(), input, inout output)
                     checkAndThrow(errCode)
-                    if (output.size == 0) {
-                        callback(None, None)
-                    } else {
-                        let blob: DataBlob = output.toDataBlob()
-                        callback(None, blob)
-                    }
+                }
+                if (output.size == 0) {
+                    callback(None, None)
+                } else {
+                    let blob: DataBlob = output.toDataBlob()
+                    callback(None, blob)
                 }
             } catch (err: BusinessException) {
                 callback(err, None)
@@ -409,6 +406,15 @@ public class Verify {
                     ptr.write(blob)
                     ptr
                 case None => CPointer<HcfBlob>()
+            }
+        }
+    }
+
+    private static func freeBlobPtr(ptr: CPointer<HcfBlob>): Unit {
+        unsafe {
+            if (ptr.isNotNull()) {
+                ptr.read().free()
+                LibC.free(ptr)
             }
         }
     }

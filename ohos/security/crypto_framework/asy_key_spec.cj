@@ -20,6 +20,7 @@ package ohos.security.crypto_framework
 import ohos.labels.APILevel
 import std.math.numeric.BigInt
 import std.deriving.Derive
+import std.collection.HashMap
 
 /**
  * Enum for signature verification parameters, which can be set by using setVerifySpec, and obtained by using
@@ -430,42 +431,46 @@ public enum AsyKeySpecItem {
 
     prop value: Int32 {
         get() {
-            match (this) {
-                case DsaPBn => 101
-                case DsaQBn => 102
-                case DsaGBn => 103
-                case DsaSkBn => 104
-                case DsaPkBn => 105
-                case EccFpPBn => 201
-                case EccABn => 202
-                case EccBBn => 203
-                case EccGXBn => 204
-                case EccGYBn => 205
-                case EccNBn => 206
-                case EccHNum => 207
-                case EccSkBn => 208
-                case EccPkXBn => 209
-                case EccPkYBn => 210
-                case EccFieldTypeStr => 211
-                case EccFieldSizeNum => 212
-                case EccCurveNameStr => 213
-                case RsaNBn => 301
-                case RsaSkBn => 302
-                case RsaPkBn => 303
-                case DhPBn => 401
-                case DhGBn => 402
-                case DhLNum => 403
-                case DhSkBn => 404
-                case DhPkBn => 405
-                case Ed25519SkBn => 501
-                case Ed25519PkBn => 502
-                case X25519SkBn => 601
-                case X25519PkBn => 602
-                case _ => throw IllegalArgumentException("The type is not supported.")
+            match (asyKeySpecItemValueMap.get(this)) {
+                case Some(v) => v
+                case None => throw IllegalArgumentException("The type is not supported.")
             }
         }
     }
 }
+
+private let asyKeySpecItemValueMap = HashMap<AsyKeySpecItem, Int32>([
+    (DsaPBn, 101),
+    (DsaQBn, 102),
+    (DsaGBn, 103),
+    (DsaSkBn, 104),
+    (DsaPkBn, 105),
+    (EccFpPBn, 201),
+    (EccABn, 202),
+    (EccBBn, 203),
+    (EccGXBn, 204),
+    (EccGYBn, 205),
+    (EccNBn, 206),
+    (EccHNum, 207),
+    (EccSkBn, 208),
+    (EccPkXBn, 209),
+    (EccPkYBn, 210),
+    (EccFieldTypeStr, 211),
+    (EccFieldSizeNum, 212),
+    (EccCurveNameStr, 213),
+    (RsaNBn, 301),
+    (RsaSkBn, 302),
+    (RsaPkBn, 303),
+    (DhPBn, 401),
+    (DhGBn, 402),
+    (DhLNum, 403),
+    (DhSkBn, 404),
+    (DhPkBn, 405),
+    (Ed25519SkBn, 501),
+    (Ed25519PkBn, 502),
+    (X25519SkBn, 601),
+    (X25519PkBn, 602)
+])
 
 @Derive[ToString, Equatable]
 @!APILevel[
