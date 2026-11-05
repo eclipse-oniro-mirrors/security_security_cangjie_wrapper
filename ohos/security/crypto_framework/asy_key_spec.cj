@@ -427,54 +427,53 @@ public enum AsyKeySpecItem {
         syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
     ]
     X25519PkBn
-    | ...
 
     prop value: Int32 {
         get() {
-            match (asyKeySpecItemValueMap().get(asyKeySpecItemOrdinal(this))) {
-                case Some(v) => v
-                case None => throw IllegalArgumentException("The type is not supported.")
-            }
+            asyKeySpecItemValue(this)
         }
     }
 }
 
-private func asyKeySpecItemOrdinal(item: AsyKeySpecItem): Int32 {
-    match (item) {
-        case DsaPBn => 1
-        case DsaQBn => 2
-        case DsaGBn => 3
-        case DsaSkBn => 4
-        case DsaPkBn => 5
-        case EccFpPBn => 6
-        case EccABn => 7
-        case EccBBn => 8
-        case EccGXBn => 9
-        case EccGYBn => 10
-        case EccNBn => 11
-        case EccHNum => 12
-        case EccSkBn => 13
-        case EccPkXBn => 14
-        case EccPkYBn => 15
-        case EccFieldTypeStr => 16
-        case EccFieldSizeNum => 17
-        case EccCurveNameStr => 18
-        case RsaNBn => 19
-        case RsaSkBn => 20
-        case _ => 0
+private func asyKeySpecItemValue(item: AsyKeySpecItem): Int32 {
+    match (asyKeySpecItemValueMap().get(item.toString())) {
+        case Some(v) => v
+        case None => throw IllegalArgumentException("The type is not supported.")
     }
 }
 
-private func asyKeySpecItemValueMap(): HashMap<Int32, Int32> {
-    return HashMap<Int32, Int32>([
-        (1, 101), (2, 102), (3, 103), (4, 104), (5, 105),
-        (6, 201), (7, 202), (8, 203), (9, 204), (10, 205),
-        (11, 206), (12, 207), (13, 208), (14, 209), (15, 210),
-        (16, 211), (17, 212), (18, 213),
-        (19, 301), (20, 302), (21, 303),
-        (22, 401), (23, 402), (24, 403), (25, 404), (26, 405),
-        (27, 501), (28, 502),
-        (29, 601), (30, 602)
+private func asyKeySpecItemValueMap(): HashMap<String, Int32> {
+    return HashMap<String, Int32>([
+        ("DsaPBn", 101),
+        ("DsaQBn", 102),
+        ("DsaGBn", 103),
+        ("DsaSkBn", 104),
+        ("DsaPkBn", 105),
+        ("EccFpPBn", 201),
+        ("EccABn", 202),
+        ("EccBBn", 203),
+        ("EccGXBn", 204),
+        ("EccGYBn", 205),
+        ("EccNBn", 206),
+        ("EccHNum", 207),
+        ("EccSkBn", 208),
+        ("EccPkXBn", 209),
+        ("EccPkYBn", 210),
+        ("EccFieldTypeStr", 211),
+        ("EccFieldSizeNum", 212),
+        ("EccCurveNameStr", 213),
+        ("RsaNBn", 301),
+        ("RsaSkBn", 302),
+        ("RsaPkBn", 303),
+        ("DhPBn", 401),
+        ("DhGBn", 402),
+        ("DhLNum", 403),
+        ("DhSkBn", 404),
+        ("DhPkBn", 405),
+        ("Ed25519SkBn", 501),
+        ("Ed25519PkBn", 502),
+        ("X25519SkBn", 601),
+        ("X25519PkBn", 602)
     ])
 }
 
