@@ -436,9 +436,45 @@ public enum AsyKeySpecItem {
 }
 
 private func asyKeySpecItemValue(item: AsyKeySpecItem): Int32 {
-    match (asyKeySpecItemValueMap().get(item.toString())) {
+    match (asyKeySpecItemValueMap().get(asyKeySpecItemKey(item))) {
         case Some(v) => v
         case None => throw IllegalArgumentException("The type is not supported.")
+    }
+}
+
+private func asyKeySpecItemKey(item: AsyKeySpecItem): String {
+    match (item) {
+        case DsaPBn => "DsaPBn"
+        case DsaQBn => "DsaQBn"
+        case DsaGBn => "DsaGBn"
+        case DsaSkBn => "DsaSkBn"
+        case DsaPkBn => "DsaPkBn"
+        case EccFpPBn => "EccFpPBn"
+        case EccABn => "EccABn"
+        case EccBBn => "EccBBn"
+        case EccGXBn => "EccGXBn"
+        case EccGYBn => "EccGYBn"
+        case EccNBn => "EccNBn"
+        case EccHNum => "EccHNum"
+        case EccSkBn => "EccSkBn"
+        case EccPkXBn => "EccPkXBn"
+        case EccPkYBn => "EccPkYBn"
+        case EccFieldTypeStr => "EccFieldTypeStr"
+        case EccFieldSizeNum => "EccFieldSizeNum"
+        case EccCurveNameStr => "EccCurveNameStr"
+        case RsaNBn => "RsaNBn"
+        case RsaSkBn => "RsaSkBn"
+        case RsaPkBn => "RsaPkBn"
+        case DhPBn => "DhPBn"
+        case DhGBn => "DhGBn"
+        case DhLNum => "DhLNum"
+        case DhSkBn => "DhSkBn"
+        case DhPkBn => "DhPkBn"
+        case Ed25519SkBn => "Ed25519SkBn"
+        case Ed25519PkBn => "Ed25519PkBn"
+        case X25519SkBn => "X25519SkBn"
+        case X25519PkBn => "X25519PkBn"
+        case _ => ""
     }
 }
 
