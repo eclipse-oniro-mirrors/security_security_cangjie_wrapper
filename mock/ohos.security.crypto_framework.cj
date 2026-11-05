@@ -16,6 +16,7 @@
 package ohos.security.crypto_framework
 
 import ohos.labels.APILevel
+import ohos.business_exception.AsyncCallback
 
 @!APILevel[
     since: "22",
@@ -603,8 +604,457 @@ public class SymKeyGenerator {
     public func convertKey(key: DataBlob): SymKey {
         return SymKey()
     }
-    
+
     public init() {
         super()
     }
+}
+
+@!APILevel[
+    since: "26.1.0",
+    syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
+    throwexception: true
+]
+public func createAsyKeyGenerator(algName: String): AsyKeyGenerator {
+    return AsyKeyGenerator()
+}
+
+@!APILevel[
+    since: "26.1.0",
+    syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
+]
+public class AsyKeyGenerator {
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
+    ]
+    public prop algName: String {
+        get() {
+            return String()
+        }
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
+        throwexception: true
+    ]
+    public func generateKeyPair(callback: AsyncCallback<KeyPair>): Unit {
+        return ()
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
+        throwexception: true
+    ]
+    public func convertKey(callback: AsyncCallback<KeyPair>, pubKey!: Option<DataBlob> = None,
+        priKey!: Option<DataBlob> = None): Unit {
+        return ()
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
+        throwexception: true
+    ]
+    public func convertPemKey(callback: AsyncCallback<KeyPair>, pubKey!: Option<String> = None,
+        priKey!: Option<String> = None): Unit {
+        return ()
+    }
+
+    public init() {
+        super()
+    }
+}
+
+@!APILevel[
+    since: "26.1.0",
+    syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
+]
+public class PriKey <: Key {
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key"
+    ]
+    public prop format: String {
+        get() {
+            return String()
+        }
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key"
+    ]
+    public prop algName: String {
+        get() {
+            return String()
+        }
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
+        throwexception: true
+    ]
+    public func getAsyKeySpec(itemType: AsyKeySpecItem): ResultSpec {
+        return ResultSpec.StringValue(String())
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
+        throwexception: true
+    ]
+    public func getEncodedDer(format: String): DataBlob {
+        return DataBlob(Array())
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
+        throwexception: true
+    ]
+    public func getEncodedPem(format: String): String {
+        return String()
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key",
+        throwexception: true
+    ]
+    public func getEncoded(): DataBlob {
+        return DataBlob(Array())
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
+    ]
+    public func clearMem(): Unit {
+        return ()
+    }
+
+    public init() {
+        super()
+    }
+}
+
+@!APILevel[
+    since: "26.1.0",
+    syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
+]
+public class PubKey <: Key {
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key"
+    ]
+    public prop format: String {
+        get() {
+            return String()
+        }
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key"
+    ]
+    public prop algName: String {
+        get() {
+            return String()
+        }
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
+        throwexception: true
+    ]
+    public func getAsyKeySpec(itemType: AsyKeySpecItem): ResultSpec {
+        return ResultSpec.StringValue(String())
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
+        throwexception: true
+    ]
+    public func getEncodedDer(format: String): DataBlob {
+        return DataBlob(Array())
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey",
+        throwexception: true
+    ]
+    public func getEncodedPem(format: String): String {
+        return String()
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key",
+        throwexception: true
+    ]
+    public func getEncoded(): DataBlob {
+        return DataBlob(Array())
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
+    ]
+    public func clearMem(): Unit {
+        return ()
+    }
+
+    public init() {
+        super()
+    }
+}
+
+@!APILevel[
+    since: "26.1.0",
+    syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
+]
+public class KeyPair {
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
+    ]
+    public prop priKey: PriKey {
+        get() {
+            return PriKey()
+        }
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
+    ]
+    public prop pubKey: PubKey {
+        get() {
+            return PubKey()
+        }
+    }
+
+    public init() {
+        super()
+    }
+}
+
+@!APILevel[
+    since: "26.1.0",
+    syscap: "SystemCapability.Security.CryptoFramework.Signature",
+    throwexception: true
+]
+public func createVerify(algName: String): Verify {
+    return Verify()
+}
+
+@!APILevel[
+    since: "26.1.0",
+    syscap: "SystemCapability.Security.CryptoFramework.Signature"
+]
+public class Verify {
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature"
+    ]
+    public prop algName: String {
+        get() {
+            return String()
+        }
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature",
+        throwexception: true
+    ]
+    public func initialize(pubKey: PubKey, callback: AsyncCallback<Unit>): Unit {
+        return ()
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature",
+        throwexception: true
+    ]
+    public func update(data: DataBlob, callback: AsyncCallback<Unit>): Unit {
+        return ()
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature",
+        throwexception: true
+    ]
+    public func verify(data: DataBlob, signatureData: DataBlob, callback: AsyncCallback<Bool>): Unit {
+        return ()
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature",
+        throwexception: true
+    ]
+    public func verify(signatureData: DataBlob, callback: AsyncCallback<Bool>,
+        data!: Option<DataBlob> = None): Unit {
+        return ()
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature",
+        throwexception: true
+    ]
+    public func recover(signatureData: DataBlob, callback: AsyncCallback<?DataBlob>): Unit {
+        return ()
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature",
+        throwexception: true
+    ]
+    public func setVerifySpec(itemType: SignSpecItem, itemValue: Int32): Unit {
+        return ()
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature",
+        throwexception: true
+    ]
+    public func setVerifySpec(itemType: SignSpecItem, itemValue: Array<UInt8>): Unit {
+        return ()
+    }
+
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature",
+        throwexception: true
+    ]
+    public func getVerifySpec(itemType: SignSpecItem): ResultSpec {
+        return ResultSpec.StringValue(String())
+    }
+
+    public init() {
+        super()
+    }
+}
+
+@!APILevel[
+    since: "26.1.0",
+    syscap: "SystemCapability.Security.CryptoFramework.Signature"
+]
+public enum SignSpecItem {
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature"
+    ]
+    PssMdNameStr
+    |
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature"
+    ]
+    PssMgfNameStr
+    |
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature"
+    ]
+    PssMgf1MdStr
+    |
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature"
+    ]
+    PssSaltLenNum
+    |
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature"
+    ]
+    PssTrailerFieldNum
+    |
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature"
+    ]
+    Sm2UserIdUint8arr
+    |
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature"
+    ]
+    MlDsaDeterministicBool
+    |
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature"
+    ]
+    MlDsaMuBool
+    |
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Signature"
+    ]
+    MlDsaContextUint8arr
+    | ...
+}
+
+@!APILevel[
+    since: "26.1.0",
+    syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
+]
+public enum AsyKeySpecItem {
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
+    ]
+    DsaPBn
+    |
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
+    ]
+    DsaQBn
+    | ...
+}
+
+@!APILevel[
+    since: "26.1.0",
+    syscap: "SystemCapability.Security.CryptoFramework"
+]
+public enum ResultSpec {
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework"
+    ]
+    BigintValue(Int64)
+    |
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework"
+    ]
+    Int32Value(Int32)
+    |
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework"
+    ]
+    StringValue(String)
+    |
+    @!APILevel[
+        since: "26.1.0",
+        syscap: "SystemCapability.Security.CryptoFramework"
+    ]
+    Uint8ArrayValue(Array<UInt8>)
+    | ...
 }
