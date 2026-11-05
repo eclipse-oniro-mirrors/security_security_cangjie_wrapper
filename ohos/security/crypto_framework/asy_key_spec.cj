@@ -26,6 +26,7 @@ import std.math.numeric.BigInt
  *
  * Currently, only RSA and SM2 are supported.
  */
+@Derive[ToString, Equatable<SignSpecItem>]
 @!APILevel[
     since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Signature"
@@ -144,62 +145,10 @@ public enum SignSpecItem {
     }
 }
 
-extend SignSpecItem <: ToString {
-    /**
-     * Converts the SignSpecItem to its string representation.
-     * @returns { String } A string representation of the SignSpecItem.
-     */
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Signature"
-    ]
-    public func toString(): String {
-        match (this) {
-            case PssMdNameStr => "PssMdNameStr"
-            case PssMgfNameStr => "PssMgfNameStr"
-            case PssMgf1MdStr => "PssMgf1MdStr"
-            case PssSaltLenNum => "PssSaltLenNum"
-            case PssTrailerFieldNum => "PssTrailerFieldNum"
-            case Sm2UserIdUint8arr => "Sm2UserIdUint8arr"
-            case MlDsaDeterministicBool => "MlDsaDeterministicBool"
-            case MlDsaMuBool => "MlDsaMuBool"
-            case MlDsaContextUint8arr => "MlDsaContextUint8arr"
-            case _ => throw IllegalArgumentException("The type is not supported.")
-        }
-    }
-}
-
-extend SignSpecItem <: Equatable<SignSpecItem> {
-    /**
-     * Compares this SignSpecItem with another for equality.
-     * @param { SignSpecItem } other - The SignSpecItem to compare with.
-     * @returns { Bool } True if both modes are equal, false otherwise.
-     */
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Signature"
-    ]
-    public operator func ==(other: SignSpecItem): Bool {
-        return this.toString() == other.toString()
-    }
-
-    /**
-     * Compares this SignSpecItem with another for inequality.
-     * @param { SignSpecItem } other - The SignSpecItem to compare with.
-     * @returns { Bool } True if both modes are not equal, false otherwise.
-     */
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Signature"
-    ]
-    public operator func !=(other: SignSpecItem): Bool {
-        return this.toString() != other.toString()
-    }
-}
-
 /**
  * Enumerates the asymmetric key parameters.
  */
+@Derive[ToString, Equatable<AsyKeySpecItem>]
 @!APILevel[
     since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
@@ -517,80 +466,7 @@ public enum AsyKeySpecItem {
     }
 }
 
-extend AsyKeySpecItem <: ToString {
-    /**
-     * Converts the AsyKeySpecItem to its string representation.
-     * @returns { String } A string representation of the AsyKeySpecItem.
-     */
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
-    ]
-    public func toString(): String {
-        match (this) {
-            case DsaPBn => "DsaPBn"
-            case DsaQBn => "DsaQBn"
-            case DsaGBn => "DsaGBn"
-            case DsaSkBn => "DsaSkBn"
-            case DsaPkBn => "DsaPkBn"
-            case EccFpPBn => "EccFpPBn"
-            case EccABn => "EccABn"
-            case EccBBn => "EccBBn"
-            case EccGXBn => "EccGXBn"
-            case EccGYBn => "EccGYBn"
-            case EccNBn => "EccNBn"
-            case EccHNum => "EccHNum"
-            case EccSkBn => "EccSkBn"
-            case EccPkXBn => "EccPkXBn"
-            case EccPkYBn => "EccPkYBn"
-            case EccFieldTypeStr => "EccFieldTypeStr"
-            case EccFieldSizeNum => "EccFieldSizeNum"
-            case EccCurveNameStr => "EccCurveNameStr"
-            case RsaNBn => "RsaNBn"
-            case RsaSkBn => "RsaSkBn"
-            case RsaPkBn => "RsaPkBn"
-            case DhPBn => "DhPBn"
-            case DhGBn => "DhGBn"
-            case DhLNum => "DhLNum"
-            case DhSkBn => "DhSkBn"
-            case DhPkBn => "DhPkBn"
-            case Ed25519SkBn => "Ed25519SkBn"
-            case Ed25519PkBn => "Ed25519PkBn"
-            case X25519SkBn => "X25519SkBn"
-            case X25519PkBn => "X25519PkBn"
-            case _ => throw IllegalArgumentException("The type is not supported.")
-        }
-    }
-}
-
-extend AsyKeySpecItem <: Equatable<AsyKeySpecItem> {
-    /**
-     * Compares this AsyKeySpecItem with another for equality.
-     * @param { AsyKeySpecItem } other - The AsyKeySpecItem to compare with.
-     * @returns { Bool } True if both modes are equal, false otherwise.
-     */
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
-    ]
-    public operator func ==(other: AsyKeySpecItem): Bool {
-        return this.toString() == other.toString()
-    }
-
-    /**
-     * Compares this AsyKeySpecItem with another for inequality.
-     * @param { AsyKeySpecItem } other - The AsyKeySpecItem to compare with.
-     * @returns { Bool } True if both modes are not equal, false otherwise.
-     */
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
-    ]
-    public operator func !=(other: AsyKeySpecItem): Bool {
-        return this.toString() != other.toString()
-    }
-}
-
+@Derive[ToString, Equatable<ResultSpec>]
 @!APILevel[
     since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework"
@@ -632,52 +508,4 @@ public enum ResultSpec {
     ]
     Uint8ArrayValue(Array<UInt8>)
     | ...
-}
-
-extend ResultSpec <: ToString {
-    /**
-     * Converts the ResultSpec to its string representation.
-     * @returns { String } A string representation of the ResultSpec.
-     */
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework"
-    ]
-    public func toString(): String {
-        match (this) {
-            case BigintValue(v) => v.toString()
-            case Int32Value(v) => v.toString()
-            case StringValue(v) => v
-            case Uint8ArrayValue(v) => v.toString()
-            case _ => throw IllegalArgumentException("The type is not supported.")
-        }
-    }
-}
-
-extend ResultSpec <: Equatable<ResultSpec> {
-    /**
-     * Compares this ResultSpec with another for equality.
-     * @param { ResultSpec } other - The ResultSpec to compare with.
-     * @returns { Bool } True if both values are equal, false otherwise.
-     */
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework"
-    ]
-    public operator func ==(other: ResultSpec): Bool {
-        return this.toString() == other.toString()
-    }
-
-    /**
-     * Compares this ResultSpec with another for inequality.
-     * @param { ResultSpec } other - The ResultSpec to compare with.
-     * @returns { Bool } True if both values are not equal, false otherwise.
-     */
-    @!APILevel[
-        since: "26.1.0",
-        syscap: "SystemCapability.Security.CryptoFramework"
-    ]
-    public operator func !=(other: ResultSpec): Bool {
-        return this.toString() != other.toString()
-    }
 }

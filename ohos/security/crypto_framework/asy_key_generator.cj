@@ -132,28 +132,11 @@ public class AsyKeyGenerator {
             var pri: CPointer<HcfBlob> = CPointer<HcfBlob>()
             try {
                 unsafe {
-                    pub = match (pubKey) {
-                        case Some(v) =>
-                            let ptr = safeMalloc<HcfBlob>()
-                            let blob = HcfBlob(v)
-                            ptr.write(blob)
-                            ptr
-                        case None => CPointer<HcfBlob>()
-                    }
+                    pub = toBlobPtr(pubKey)
                     pri = try {
-                        match (priKey) {
-                            case Some(v) =>
-                                let ptr = safeMalloc<HcfBlob>()
-                                let blob = HcfBlob(v)
-                                ptr.write(blob)
-                                ptr
-                            case None => CPointer<HcfBlob>()
-                        }
+                        toBlobPtr(priKey)
                     } catch (e: Exception) {
-                        if (pub.isNotNull()) {
-                            pub.read().free()
-                            LibC.free(pub)
-                        }
+                        freeBlobPtr(pub)
                         throw e
                     }
                     var errCode: Int32 = 0
@@ -166,15 +149,31 @@ public class AsyKeyGenerator {
                 callback(err, None)
             } finally {
                 unsafe {
-                    if (pub.isNotNull()) {
-                        pub.read().free()
-                        LibC.free(pub)
-                    }
-                    if (pri.isNotNull()) {
-                        pri.read().free()
-                        LibC.free(pri)
-                    }
+                    freeBlobPtr(pub)
+                    freeBlobPtr(pri)
                 }
+            }
+        }
+    }
+
+    private static func toBlobPtr(opt: Option<DataBlob>): CPointer<HcfBlob> {
+        return unsafe {
+            match (opt) {
+                case Some(v) =>
+                    let ptr = safeMalloc<HcfBlob>()
+                    let blob = HcfBlob(v)
+                    ptr.write(blob)
+                    ptr
+                case None => CPointer<HcfBlob>()
+            }
+        }
+    }
+
+    private static func freeBlobPtr(ptr: CPointer<HcfBlob>): Unit {
+        unsafe {
+            if (ptr.isNotNull()) {
+                ptr.read().free()
+                LibC.free(ptr)
             }
         }
     }
@@ -215,20 +214,11 @@ public class AsyKeyGenerator {
             var priCStr: CString = CString(CPointer<UInt8>())
             try {
                 unsafe {
-                    pubCStr = match (pubKey) {
-                        case Some(v) => LibC.mallocCString(v)
-                        case None => CString(CPointer<UInt8>())
-                    }
+                    pubCStr = toCString(pubKey)
                     priCStr = try {
-                        match (priKey) {
-                            case Some(v) => LibC.mallocCString(v)
-                            case None => CString(CPointer<UInt8>())
-                        }
+                        toCString(priKey)
                     } catch (e: Exception) {
-                        match (pubKey) {
-                            case Some(_) => LibC.free(pubCStr)
-                            case None => ()
-                        }
+                        freeCString(pubCStr, pubKey)
                         throw e
                     }
                     var errCode: Int32 = 0
@@ -241,15 +231,27 @@ public class AsyKeyGenerator {
                 callback(err, None)
             } finally {
                 unsafe {
-                    match (pubKey) {
-                        case Some(_) => LibC.free(pubCStr)
-                        case None => ()
-                    }
-                    match (priKey) {
-                        case Some(_) => LibC.free(priCStr)
-                        case None => ()
-                    }
+                    freeCString(pubCStr, pubKey)
+                    freeCString(priCStr, priKey)
                 }
+            }
+        }
+    }
+
+    private static func toCString(opt: Option<String>): CString {
+        return unsafe {
+            match (opt) {
+                case Some(v) => LibC.mallocCString(v)
+                case None => CString(CPointer<UInt8>())
+            }
+        }
+    }
+
+    private static func freeCString(ptr: CString, opt: Option<String>): Unit {
+        unsafe {
+            match (opt) {
+                case Some(_) => LibC.free(ptr)
+                case None => ()
             }
         }
     }
