@@ -662,10 +662,6 @@ public class AsyKeyGenerator {
         priKey!: Option<String> = None): Unit {
         return ()
     }
-
-    public init() {
-        super()
-    }
 }
 
 @!APILevel[
@@ -735,10 +731,6 @@ public class PriKey <: Key {
     ]
     public func clearMem(): Unit {
         return ()
-    }
-
-    public init() {
-        super()
     }
 }
 
@@ -810,10 +802,6 @@ public class PubKey <: Key {
     public func clearMem(): Unit {
         return ()
     }
-
-    public init() {
-        super()
-    }
 }
 
 @!APILevel[
@@ -839,10 +827,6 @@ public class KeyPair {
         get() {
             return PubKey()
         }
-    }
-
-    public init() {
-        super()
     }
 }
 
@@ -941,10 +925,6 @@ public class Verify {
     ]
     public func getVerifySpec(itemType: SignSpecItem): ResultSpec {
         return ResultSpec.StringValue(String())
-    }
-
-    public init() {
-        super()
     }
 }
 
