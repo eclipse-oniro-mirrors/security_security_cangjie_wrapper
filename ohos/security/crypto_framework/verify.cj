@@ -59,14 +59,7 @@ foreign {
     throwexception: true
 ]
 public func createVerify(algName: String): Verify {
-    unsafe {
-        let cstr = LibC.mallocCString(algName)
-        var errCode: Int32 = 0
-        let id = FFiOHOSVerifyConstructor(cstr, inout errCode)
-        LibC.free(cstr)
-        checkAndThrow(errCode)
-        return Verify(id, algName)
-    }
+    return Verify(VerifyImpl(algName))
 }
 
 /**
@@ -76,16 +69,11 @@ public func createVerify(algName: String): Verify {
     since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Signature"
 ]
-public class Verify <: RemoteDataLite {
-    private let _algName: String
+public class Verify {
+    private let impl: VerifyImpl
 
-    init(id: Int64, algName: String) {
-        super(id)
-        _algName = algName
-    }
-
-    ~init() {
-        releaseFFIData(myDataId)
+    init(impl: VerifyImpl) {
+        this.impl = impl
     }
 
     /**
@@ -97,7 +85,7 @@ public class Verify <: RemoteDataLite {
     ]
     public prop algName: String {
         get() {
-            return _algName
+            return impl.algName
         }
     }
 
@@ -121,7 +109,7 @@ public class Verify <: RemoteDataLite {
         spawn {
             try {
                 unsafe {
-                    let errCode = FFiOHOSVerifyInit(getID(), pubKey.getID())
+                    let errCode = FFiOHOSVerifyInit(impl.getId(), pubKey.getId())
                     checkAndThrow(errCode)
                     callback(None, ())
                 }
@@ -165,7 +153,7 @@ public class Verify <: RemoteDataLite {
             try {
                 unsafe {
                     let blob = HcfBlob(data)
-                    let errCode = FFiOHOSVerifyUpdate(getID(), blob)
+                    let errCode = FFiOHOSVerifyUpdate(impl.getId(), blob)
                     blob.free()
                     checkAndThrow(errCode)
                     callback(None, ())
@@ -216,7 +204,7 @@ public class Verify <: RemoteDataLite {
                         throw e
                     }
                     var errCode: Int32 = 0
-                    let ret = FFiOHOSVerifyVerify(getID(), dataBlob, sigBlob, inout errCode)
+                    let ret = FFiOHOSVerifyVerify(impl.getId(), dataBlob, sigBlob, inout errCode)
                     checkAndThrow(errCode)
                     callback(None, ret)
                 }
@@ -274,7 +262,7 @@ public class Verify <: RemoteDataLite {
                         throw e
                     }
                     var errCode: Int32 = 0
-                    let ret = FFiOHOSVerifyVerify(getID(), dataBlob, sigBlob, inout errCode)
+                    let ret = FFiOHOSVerifyVerify(impl.getId(), dataBlob, sigBlob, inout errCode)
                     checkAndThrow(errCode)
                     callback(None, ret)
                 }
@@ -318,7 +306,7 @@ public class Verify <: RemoteDataLite {
             try {
                 unsafe {
                     input = HcfBlob(signatureData)
-                    let errCode = FFiOHOSVerifyRecover(getID(), input, inout output)
+                    let errCode = FFiOHOSVerifyRecover(impl.getId(), input, inout output)
                     checkAndThrow(errCode)
                     if (output.size == 0) {
                         callback(None, None)
@@ -362,7 +350,7 @@ public class Verify <: RemoteDataLite {
         match (itemType) {
             case PssSaltLenNum =>
                 unsafe {
-                    let errCode = FFiOHOSVerifySetVerifySpecByNum(getID(), itemValue)
+                    let errCode = FFiOHOSVerifySetVerifySpecByNum(impl.getId(), itemValue)
                     checkAndThrow(errCode)
                 }
             case _ => throw BusinessException(ERR_PARAMETER_ERROR, "[Verify] setVerifySpec: specItem not support.")
@@ -395,7 +383,7 @@ public class Verify <: RemoteDataLite {
             case Sm2UserIdUint8arr =>
                 unsafe {
                     let blob = HcfBlob(DataBlob(itemValue))
-                    let errCode = FFiOHOSVerifySetVerifySpecByArr(getID(), blob)
+                    let errCode = FFiOHOSVerifySetVerifySpecByArr(impl.getId(), blob)
                     blob.free()
                     checkAndThrow(errCode)
                 }
@@ -423,18 +411,42 @@ public class Verify <: RemoteDataLite {
             match (itemType) {
                 case PssMdNameStr | PssMgfNameStr | PssMgf1MdStr =>
                     var errCode: Int32 = 0
-                    let returnString = FFiOHOSVerifyGetVerifySpecString(getID(), itemType.value, inout errCode)
+                    let returnString = FFiOHOSVerifyGetVerifySpecString(impl.getId(), itemType.value, inout errCode)
                     checkAndThrow(errCode)
                     let res = ResultSpec.StringValue(returnString.toString())
                     LibC.free(returnString)
                     return res
                 case PssSaltLenNum | PssTrailerFieldNum =>
                     var returnInt: Int32 = 0
-                    let errCode = FFiOHOSVerifyGetVerifySpecNum(getID(), itemType.value, inout returnInt)
+                    let errCode = FFiOHOSVerifyGetVerifySpecNum(impl.getId(), itemType.value, inout returnInt)
                     checkAndThrow(errCode)
                     return ResultSpec.Int32Value(returnInt)
                 case _ => throw BusinessException(ERR_PARAMETER_ERROR, "specItem not support.")
             }
         }
+    }
+}
+
+class VerifyImpl <: RemoteDataLite {
+    let algName: String
+
+    init(algName: String) {
+        super(unsafe {
+            let cstr = LibC.mallocCString(algName)
+            var errCode: Int32 = 0
+            let id = FFiOHOSVerifyConstructor(cstr, inout errCode)
+            LibC.free(cstr)
+            checkAndThrow(errCode)
+            id
+        })
+        this.algName = algName
+    }
+
+    ~init() {
+        releaseFFIData(myDataId)
+    }
+
+    func getId(): Int64 {
+        getID()
     }
 }

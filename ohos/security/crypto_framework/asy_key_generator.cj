@@ -47,14 +47,7 @@ foreign {
     throwexception: true
 ]
 public func createAsyKeyGenerator(algName: String): AsyKeyGenerator {
-    unsafe {
-        let cstr = LibC.mallocCString(algName)
-        var errCode: Int32 = 0
-        let id = FFiOHOSAsyKeyGeneratorConstructor(cstr, inout errCode)
-        LibC.free(cstr)
-        checkAndThrow(errCode)
-        return AsyKeyGenerator(id, algName)
-    }
+    return AsyKeyGenerator(AsyKeyGeneratorImpl(algName))
 }
 
 /**
@@ -64,16 +57,11 @@ public func createAsyKeyGenerator(algName: String): AsyKeyGenerator {
     since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
 ]
-public class AsyKeyGenerator <: RemoteDataLite {
-    private let _algName: String
+public class AsyKeyGenerator {
+    private let impl: AsyKeyGeneratorImpl
 
-    init(id: Int64, algName: String) {
-        super(id)
-        _algName = algName
-    }
-
-    ~init() {
-        releaseFFIData(myDataId)
+    init(impl: AsyKeyGeneratorImpl) {
+        this.impl = impl
     }
 
     /**
@@ -85,7 +73,7 @@ public class AsyKeyGenerator <: RemoteDataLite {
     ]
     public prop algName: String {
         get() {
-            return _algName
+            return impl.algName
         }
     }
 
@@ -108,9 +96,9 @@ public class AsyKeyGenerator <: RemoteDataLite {
             try {
                 unsafe {
                     var errCode: Int32 = 0
-                    let id = FFiOHOSAsyKeyGeneratorGenerateKeyPair(getID(), inout errCode)
+                    let id = FFiOHOSAsyKeyGeneratorGenerateKeyPair(impl.getId(), inout errCode)
                     checkAndThrow(errCode)
-                    let keyPair = KeyPair(id, _algName)
+                    let keyPair = KeyPair(KeyPairImpl(id, impl.algName))
                     callback(None, keyPair)
                 }
             } catch (err: BusinessException) {
@@ -169,9 +157,9 @@ public class AsyKeyGenerator <: RemoteDataLite {
                         throw e
                     }
                     var errCode: Int32 = 0
-                    let id = FFiOHOSAsyKeyGeneratorConvertKey(getID(), pub, pri, inout errCode)
+                    let id = FFiOHOSAsyKeyGeneratorConvertKey(impl.getId(), pub, pri, inout errCode)
                     checkAndThrow(errCode)
-                    let keyPair = KeyPair(id, _algName)
+                    let keyPair = KeyPair(KeyPairImpl(id, impl.algName))
                     callback(None, keyPair)
                 }
             } catch (err: BusinessException) {
@@ -244,9 +232,9 @@ public class AsyKeyGenerator <: RemoteDataLite {
                         throw e
                     }
                     var errCode: Int32 = 0
-                    let id = FFiOHOSAsyKeyGeneratorConvertPemKey(getID(), pubCStr, priCStr, inout errCode)
+                    let id = FFiOHOSAsyKeyGeneratorConvertPemKey(impl.getId(), pubCStr, priCStr, inout errCode)
                     checkAndThrow(errCode)
-                    let keyPair = KeyPair(id, _algName)
+                    let keyPair = KeyPair(KeyPairImpl(id, impl.algName))
                     callback(None, keyPair)
                 }
             } catch (err: BusinessException) {
@@ -264,5 +252,29 @@ public class AsyKeyGenerator <: RemoteDataLite {
                 }
             }
         }
+    }
+}
+
+class AsyKeyGeneratorImpl <: RemoteDataLite {
+    let algName: String
+
+    init(algName: String) {
+        super(unsafe {
+            let cstr = LibC.mallocCString(algName)
+            var errCode: Int32 = 0
+            let id = FFiOHOSAsyKeyGeneratorConstructor(cstr, inout errCode)
+            LibC.free(cstr)
+            checkAndThrow(errCode)
+            id
+        })
+        this.algName = algName
+    }
+
+    ~init() {
+        releaseFFIData(myDataId)
+    }
+
+    func getId(): Int64 {
+        getID()
     }
 }

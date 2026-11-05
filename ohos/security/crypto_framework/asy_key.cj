@@ -72,16 +72,11 @@ foreign {
     since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
 ]
-public class PriKey <: RemoteDataLite & Key {
-    private let _algName: String
+public class PriKey <: Key {
+    private let impl: PriKeyImpl
 
-    init(id: Int64, algName: String) {
-        super(id)
-        _algName = algName
-    }
-
-    ~init() {
-        releaseFFIData(myDataId)
+    init(impl: PriKeyImpl) {
+        this.impl = impl
     }
 
     /**
@@ -95,7 +90,7 @@ public class PriKey <: RemoteDataLite & Key {
         get() {
             unsafe {
                 var errCode: Int32 = 0
-                let cstr = FfiOHOSPriKeyGetFormat(getID(), inout errCode)
+                let cstr = FfiOHOSPriKeyGetFormat(impl.getId(), inout errCode)
                 checkAndThrow(errCode)
                 return cstr.toString()
             }
@@ -112,7 +107,7 @@ public class PriKey <: RemoteDataLite & Key {
     ]
     public prop algName: String {
         get() {
-            return _algName
+            return impl.algName
         }
     }
 
@@ -136,7 +131,7 @@ public class PriKey <: RemoteDataLite & Key {
         if (asyKeySpecItemType == SPEC_ITEM_TYPE_BIG_INT) {
             unsafe {
                 var errCode: Int32 = 0
-                let returnBigInt = FFiOHOSPriKeyGetAsyKeySpecByBigInt(getID(), itemType.value, inout errCode)
+                let returnBigInt = FFiOHOSPriKeyGetAsyKeySpecByBigInt(impl.getId(), itemType.value, inout errCode)
                 checkAndThrow(errCode)
                 let res = ResultSpec.BigintValue(BigInt(true, returnBigInt.toArray()))
                 returnBigInt.free()
@@ -145,14 +140,14 @@ public class PriKey <: RemoteDataLite & Key {
         } else if (asyKeySpecItemType == SPEC_ITEM_TYPE_NUM) {
             unsafe {
                 var errCode: Int32 = 0
-                let returnNum = FFiOHOSPriKeyGetAsyKeySpecByNum(getID(), itemType.value, inout errCode)
+                let returnNum = FFiOHOSPriKeyGetAsyKeySpecByNum(impl.getId(), itemType.value, inout errCode)
                 checkAndThrow(errCode)
                 return ResultSpec.Int32Value(Int32(returnNum))
             }
         } else if (asyKeySpecItemType == SPEC_ITEM_TYPE_STR) {
             unsafe {
                 var errCode: Int32 = 0
-                let returnString = FFiOHOSPriKeyGetAsyKeySpecByStr(getID(), itemType.value, inout errCode)
+                let returnString = FFiOHOSPriKeyGetAsyKeySpecByStr(impl.getId(), itemType.value, inout errCode)
                 checkAndThrow(errCode)
                 let res = ResultSpec.StringValue(returnString.toString())
                 LibC.free(returnString)
@@ -188,7 +183,7 @@ public class PriKey <: RemoteDataLite & Key {
         unsafe {
             let cformat = LibC.mallocCString(format)
             var errCode: Int32 = 0
-            let returnBlob: HcfBlob = FFiOHOSPriKeyGetEncodedDer(getID(), cformat, inout errCode)
+            let returnBlob: HcfBlob = FFiOHOSPriKeyGetEncodedDer(impl.getId(), cformat, inout errCode)
             LibC.free(cformat)
             checkAndThrow(errCode)
             let blob = returnBlob.toDataBlob()
@@ -218,7 +213,7 @@ public class PriKey <: RemoteDataLite & Key {
         unsafe {
             let cformat = LibC.mallocCString(format)
             var errCode: Int32 = 0
-            let ret: CString = FFiOHOSPriKeyGetEncodedPem(getID(), cformat, inout errCode)
+            let ret: CString = FFiOHOSPriKeyGetEncodedPem(impl.getId(), cformat, inout errCode)
             LibC.free(cformat)
             checkAndThrow(errCode)
             let str = ret.toString()
@@ -246,7 +241,7 @@ public class PriKey <: RemoteDataLite & Key {
     public func getEncoded(): DataBlob {
         unsafe {
             var errCode: Int32 = 0
-            let returnBlob: HcfBlob = FFiOHOSPriKeyGetEncoded(getID(), inout errCode)
+            let returnBlob: HcfBlob = FFiOHOSPriKeyGetEncoded(impl.getId(), inout errCode)
             checkAndThrow(errCode)
             let blob = returnBlob.toDataBlob()
             returnBlob.free()
@@ -263,9 +258,26 @@ public class PriKey <: RemoteDataLite & Key {
     ]
     public func clearMem(): Unit {
         unsafe {
-            let errCode = FFiOHOSPriKeyClearMem(getID())
+            let errCode = FFiOHOSPriKeyClearMem(impl.getId())
             checkAndThrow(errCode)
         }
+    }
+}
+
+class PriKeyImpl <: RemoteDataLite {
+    let algName: String
+
+    init(id: Int64, algName: String) {
+        super(id)
+        this.algName = algName
+    }
+
+    ~init() {
+        releaseFFIData(myDataId)
+    }
+
+    func getId(): Int64 {
+        getID()
     }
 }
 
@@ -279,16 +291,11 @@ public class PriKey <: RemoteDataLite & Key {
     since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
 ]
-public class PubKey <: RemoteDataLite & Key {
-    private let _algName: String
+public class PubKey <: Key {
+    private let impl: PubKeyImpl
 
-    init(id: Int64, algName: String) {
-        super(id)
-        _algName = algName
-    }
-
-    ~init() {
-        releaseFFIData(myDataId)
+    init(impl: PubKeyImpl) {
+        this.impl = impl
     }
 
     /**
@@ -302,7 +309,7 @@ public class PubKey <: RemoteDataLite & Key {
         get() {
             unsafe {
                 var errCode: Int32 = 0
-                let cstr = FfiOHOSPubKeyGetFormat(getID(), inout errCode)
+                let cstr = FfiOHOSPubKeyGetFormat(impl.getId(), inout errCode)
                 checkAndThrow(errCode)
                 return cstr.toString()
             }
@@ -319,7 +326,7 @@ public class PubKey <: RemoteDataLite & Key {
     ]
     public prop algName: String {
         get() {
-            return _algName
+            return impl.algName
         }
     }
 
@@ -343,7 +350,7 @@ public class PubKey <: RemoteDataLite & Key {
         if (asyKeySpecItemType == SPEC_ITEM_TYPE_BIG_INT) {
             unsafe {
                 var errCode: Int32 = 0
-                let returnBigInt = FFiOHOSPubKeyGetAsyKeySpecByBigInt(getID(), itemType.value, inout errCode)
+                let returnBigInt = FFiOHOSPubKeyGetAsyKeySpecByBigInt(impl.getId(), itemType.value, inout errCode)
                 checkAndThrow(errCode)
                 let res = ResultSpec.BigintValue(BigInt(true, returnBigInt.toArray()))
                 returnBigInt.free()
@@ -352,14 +359,14 @@ public class PubKey <: RemoteDataLite & Key {
         } else if (asyKeySpecItemType == SPEC_ITEM_TYPE_NUM) {
             unsafe {
                 var errCode: Int32 = 0
-                let returnNum = FFiOHOSPubKeyGetAsyKeySpecByNum(getID(), itemType.value, inout errCode)
+                let returnNum = FFiOHOSPubKeyGetAsyKeySpecByNum(impl.getId(), itemType.value, inout errCode)
                 checkAndThrow(errCode)
                 return ResultSpec.Int32Value(Int32(returnNum))
             }
         } else if (asyKeySpecItemType == SPEC_ITEM_TYPE_STR) {
             unsafe {
                 var errCode: Int32 = 0
-                let returnString = FFiOHOSPubKeyGetAsyKeySpecByStr(getID(), itemType.value, inout errCode)
+                let returnString = FFiOHOSPubKeyGetAsyKeySpecByStr(impl.getId(), itemType.value, inout errCode)
                 checkAndThrow(errCode)
                 let res = ResultSpec.StringValue(returnString.toString())
                 LibC.free(returnString)
@@ -396,7 +403,7 @@ public class PubKey <: RemoteDataLite & Key {
         unsafe {
             let cformat = LibC.mallocCString(format)
             var errCode: Int32 = 0
-            let returnBlob: HcfBlob = FFiOHOSPubKeyGetEncodedDer(getID(), cformat, inout errCode)
+            let returnBlob: HcfBlob = FFiOHOSPubKeyGetEncodedDer(impl.getId(), cformat, inout errCode)
             LibC.free(cformat)
             checkAndThrow(errCode)
             let blob = returnBlob.toDataBlob()
@@ -426,7 +433,7 @@ public class PubKey <: RemoteDataLite & Key {
         unsafe {
             let cformat = LibC.mallocCString(format)
             var errCode: Int32 = 0
-            let ret: CString = FFiOHOSPubKeyGetEncodedPem(getID(), cformat, inout errCode)
+            let ret: CString = FFiOHOSPubKeyGetEncodedPem(impl.getId(), cformat, inout errCode)
             LibC.free(cformat)
             checkAndThrow(errCode)
             let str = ret.toString()
@@ -454,7 +461,7 @@ public class PubKey <: RemoteDataLite & Key {
     public func getEncoded(): DataBlob {
         unsafe {
             var errCode: Int32 = 0
-            let returnBlob: HcfBlob = FFiOHOSPubKeyGetEncoded(getID(), inout errCode)
+            let returnBlob: HcfBlob = FFiOHOSPubKeyGetEncoded(impl.getId(), inout errCode)
             checkAndThrow(errCode)
             let blob = returnBlob.toDataBlob()
             returnBlob.free()
@@ -463,7 +470,7 @@ public class PubKey <: RemoteDataLite & Key {
     }
 
     func getRawPointer(): CPointer<Unit> {
-        return unsafe { FfiOHOSPubKeyGetRawPointer(getID()) }
+        return unsafe { FfiOHOSPubKeyGetRawPointer(impl.getId()) }
     }
 
     static func createFromRawPointer(ptr: CPointer<Unit>): PubKey {
@@ -472,8 +479,25 @@ public class PubKey <: RemoteDataLite & Key {
             var retString = CPointer<UInt8>()
             let id = FfiOHOSPubKeyFromRawPointer(ptr, inout retString, inout errCode)
             checkAndThrow(errCode)
-            return PubKey(id, CString(retString).toString())
+            return PubKey(PubKeyImpl(id, CString(retString).toString()))
         }
+    }
+}
+
+class PubKeyImpl <: RemoteDataLite {
+    let algName: String
+
+    init(id: Int64, algName: String) {
+        super(id)
+        this.algName = algName
+    }
+
+    ~init() {
+        releaseFFIData(myDataId)
+    }
+
+    func getId(): Int64 {
+        getID()
     }
 }
 
@@ -493,35 +517,11 @@ public class PubKey <: RemoteDataLite & Key {
     since: "26.1.0",
     syscap: "SystemCapability.Security.CryptoFramework.Key.AsymKey"
 ]
-public class KeyPair <: RemoteDataLite {
-    private let _algName: String
-    private let _pubKey: ?PubKey
-    private let _priKey: ?PriKey
+public class KeyPair {
+    private let impl: KeyPairImpl
 
-    init(id: Int64, algName: String) {
-        super(id)
-        _algName = algName
-
-        unsafe {
-            var errCode: Int32 = 0
-            let pubId = FFiOHOSKeyPairPubKey(getID(), inout errCode)
-            _pubKey = if (errCode == 0) {
-                PubKey(pubId, algName)
-            } else {
-                None
-            }
-            errCode = 0
-            let priId = FFiOHOSKeyPairPriKey(getID(), inout errCode)
-            _priKey = if (errCode == 0) {
-                PriKey(priId, algName)
-            } else {
-                None
-            }
-        }
-    }
-
-    ~init() {
-        releaseFFIData(myDataId)
+    init(impl: KeyPairImpl) {
+        this.impl = impl
     }
 
     /**
@@ -533,7 +533,7 @@ public class KeyPair <: RemoteDataLite {
     ]
     public prop priKey: PriKey {
         get() {
-            _priKey ?? throw BusinessException(ERR_PARAMETER_ERROR, "[KeyPair] priKey: Parameter error.")
+            impl.priKey ?? throw BusinessException(ERR_PARAMETER_ERROR, "[KeyPair] priKey: Parameter error.")
         }
     }
 
@@ -546,7 +546,43 @@ public class KeyPair <: RemoteDataLite {
     ]
     public prop pubKey: PubKey {
         get() {
-            _pubKey ?? throw BusinessException(ERR_PARAMETER_ERROR, "[KeyPair] pubKey: Parameter error.")
+            impl.pubKey ?? throw BusinessException(ERR_PARAMETER_ERROR, "[KeyPair] pubKey: Parameter error.")
         }
+    }
+}
+
+class KeyPairImpl <: RemoteDataLite {
+    let algName: String
+    let pubKey: ?PubKey
+    let priKey: ?PriKey
+
+    init(id: Int64, algName: String) {
+        super(id)
+        this.algName = algName
+
+        unsafe {
+            var errCode: Int32 = 0
+            let pubId = FFiOHOSKeyPairPubKey(getID(), inout errCode)
+            this.pubKey = if (errCode == 0) {
+                PubKey(PubKeyImpl(pubId, algName))
+            } else {
+                None
+            }
+            errCode = 0
+            let priId = FFiOHOSKeyPairPriKey(getID(), inout errCode)
+            this.priKey = if (errCode == 0) {
+                PriKey(PriKeyImpl(priId, algName))
+            } else {
+                None
+            }
+        }
+    }
+
+    ~init() {
+        releaseFFIData(myDataId)
+    }
+
+    func getId(): Int64 {
+        getID()
     }
 }
