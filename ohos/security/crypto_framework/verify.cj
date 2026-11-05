@@ -189,20 +189,9 @@ public class Verify {
             try {
                 unsafe {
                     dataBlob = safeMalloc<HcfBlob>()
-                    dataHb = try {
-                        HcfBlob(data)
-                    } catch (e: Exception) {
-                        LibC.free(dataBlob)
-                        throw e
-                    }
+                    dataHb = HcfBlob(data)
                     dataBlob.write(dataHb)
-                    sigBlob = try {
-                        HcfBlob(signatureData)
-                    } catch (e: Exception) {
-                        dataHb.free()
-                        LibC.free(dataBlob)
-                        throw e
-                    }
+                    sigBlob = HcfBlob(signatureData)
                     var errCode: Int32 = 0
                     let ret = FFiOHOSVerifyVerify(impl.getId(), dataBlob, sigBlob, inout errCode)
                     checkAndThrow(errCode)
@@ -244,23 +233,8 @@ public class Verify {
             var sigBlob: HcfBlob = HcfBlob(CPointer<UInt8>(), 0)
             try {
                 unsafe {
-                    dataBlob = match (data) {
-                        case Some(v) =>
-                            let ptr = safeMalloc<HcfBlob>()
-                            let blob = HcfBlob(v)
-                            ptr.write(blob)
-                            ptr
-                        case None => CPointer<HcfBlob>()
-                    }
-                    sigBlob = try {
-                        HcfBlob(signatureData)
-                    } catch (e: Exception) {
-                        if (dataBlob.isNotNull()) {
-                            dataBlob.read().free()
-                            LibC.free(dataBlob)
-                        }
-                        throw e
-                    }
+                    dataBlob = toBlobPtr(data)
+                    sigBlob = HcfBlob(signatureData)
                     var errCode: Int32 = 0
                     let ret = FFiOHOSVerifyVerify(impl.getId(), dataBlob, sigBlob, inout errCode)
                     checkAndThrow(errCode)
@@ -422,6 +396,19 @@ public class Verify {
                     checkAndThrow(errCode)
                     return ResultSpec.Int32Value(returnInt)
                 case _ => throw BusinessException(ERR_PARAMETER_ERROR, "specItem not support.")
+            }
+        }
+    }
+
+    private static func toBlobPtr(opt: Option<DataBlob>): CPointer<HcfBlob> {
+        return unsafe {
+            match (opt) {
+                case Some(v) =>
+                    let ptr = safeMalloc<HcfBlob>()
+                    let blob = HcfBlob(v)
+                    ptr.write(blob)
+                    ptr
+                case None => CPointer<HcfBlob>()
             }
         }
     }

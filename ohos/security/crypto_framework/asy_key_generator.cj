@@ -133,12 +133,7 @@ public class AsyKeyGenerator {
             try {
                 unsafe {
                     pub = toBlobPtr(pubKey)
-                    pri = try {
-                        toBlobPtr(priKey)
-                    } catch (e: Exception) {
-                        freeBlobPtr(pub)
-                        throw e
-                    }
+                    pri = toBlobPtr(priKey)
                     var errCode: Int32 = 0
                     let id = FFiOHOSAsyKeyGeneratorConvertKey(impl.getId(), pub, pri, inout errCode)
                     checkAndThrow(errCode)
@@ -215,12 +210,7 @@ public class AsyKeyGenerator {
             try {
                 unsafe {
                     pubCStr = toCString(pubKey)
-                    priCStr = try {
-                        toCString(priKey)
-                    } catch (e: Exception) {
-                        freeCString(pubCStr, pubKey)
-                        throw e
-                    }
+                    priCStr = toCString(priKey)
                     var errCode: Int32 = 0
                     let id = FFiOHOSAsyKeyGeneratorConvertPemKey(impl.getId(), pubCStr, priCStr, inout errCode)
                     checkAndThrow(errCode)
