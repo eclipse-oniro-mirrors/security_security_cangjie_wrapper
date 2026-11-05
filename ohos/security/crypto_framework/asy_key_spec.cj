@@ -20,7 +20,6 @@ package ohos.security.crypto_framework
 import ohos.labels.APILevel
 import std.math.numeric.BigInt
 import std.deriving.Derive
-import std.collection.HashMap
 
 /**
  * Enum for signature verification parameters, which can be set by using setVerifySpec, and obtained by using
@@ -436,64 +435,22 @@ public enum AsyKeySpecItem {
 }
 
 private func asyKeySpecItemValue(item: AsyKeySpecItem): Int32 {
-    match (asyKeySpecItemValueMap().get(asyKeySpecItemKey(item))) {
-        case Some(v) => v
-        case None => throw IllegalArgumentException("The type is not supported.")
-    }
-}
-
-private func asyKeySpecItemKey(item: AsyKeySpecItem): String {
-    let keys = [
-        "DsaPBn", "DsaQBn", "DsaGBn", "DsaSkBn", "DsaPkBn",
-        "EccFpPBn", "EccABn", "EccBBn", "EccGXBn", "EccGYBn",
-        "EccNBn", "EccHNum", "EccSkBn", "EccPkXBn", "EccPkYBn",
-        "EccFieldTypeStr", "EccFieldSizeNum", "EccCurveNameStr",
-        "RsaNBn", "RsaSkBn", "RsaPkBn",
-        "DhPBn", "DhGBn", "DhLNum", "DhSkBn", "DhPkBn",
-        "Ed25519SkBn", "Ed25519PkBn",
-        "X25519SkBn", "X25519PkBn"
+    let entries: Array<(AsyKeySpecItem, Int32)> = [
+        (DsaPBn, 101), (DsaQBn, 102), (DsaGBn, 103), (DsaSkBn, 104), (DsaPkBn, 105),
+        (EccFpPBn, 201), (EccABn, 202), (EccBBn, 203), (EccGXBn, 204), (EccGYBn, 205),
+        (EccNBn, 206), (EccHNum, 207), (EccSkBn, 208), (EccPkXBn, 209), (EccPkYBn, 210),
+        (EccFieldTypeStr, 211), (EccFieldSizeNum, 212), (EccCurveNameStr, 213),
+        (RsaNBn, 301), (RsaSkBn, 302), (RsaPkBn, 303),
+        (DhPBn, 401), (DhGBn, 402), (DhLNum, 403), (DhSkBn, 404), (DhPkBn, 405),
+        (Ed25519SkBn, 501), (Ed25519PkBn, 502),
+        (X25519SkBn, 601), (X25519PkBn, 602)
     ]
-    for (key in keys) {
-        if (key == item.toString()) {
-            return key
+    for ((k, v) in entries) {
+        if (k == item) {
+            return v
         }
     }
-    return ""
-}
-
-private func asyKeySpecItemValueMap(): HashMap<String, Int32> {
-    return HashMap<String, Int32>([
-        ("DsaPBn", 101),
-        ("DsaQBn", 102),
-        ("DsaGBn", 103),
-        ("DsaSkBn", 104),
-        ("DsaPkBn", 105),
-        ("EccFpPBn", 201),
-        ("EccABn", 202),
-        ("EccBBn", 203),
-        ("EccGXBn", 204),
-        ("EccGYBn", 205),
-        ("EccNBn", 206),
-        ("EccHNum", 207),
-        ("EccSkBn", 208),
-        ("EccPkXBn", 209),
-        ("EccPkYBn", 210),
-        ("EccFieldTypeStr", 211),
-        ("EccFieldSizeNum", 212),
-        ("EccCurveNameStr", 213),
-        ("RsaNBn", 301),
-        ("RsaSkBn", 302),
-        ("RsaPkBn", 303),
-        ("DhPBn", 401),
-        ("DhGBn", 402),
-        ("DhLNum", 403),
-        ("DhSkBn", 404),
-        ("DhPkBn", 405),
-        ("Ed25519SkBn", 501),
-        ("Ed25519PkBn", 502),
-        ("X25519SkBn", 601),
-        ("X25519PkBn", 602)
-    ])
+    throw IllegalArgumentException("The type is not supported.")
 }
 
 @Derive[ToString, Equatable]
