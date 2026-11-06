@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,17 +21,22 @@ ohos_cangjie_shared_library("ohos.security.crypto_framework") {
     sources = [ "../../../mock/ohos.security.crypto_framework.cj" ]
   } else {
     sources = [
+      "asy_key.cj",
+      "asy_key_generator.cj",
+      "asy_key_spec.cj",
       "cipher.cj",
       "cj_crypto_common.cj",
       "cj_crypto_enum.cj",
       "cj_crypto_interface.cj",
       "cj_crypto_log.cj",
       "cj_crypto_native.cj",
+      "cj_crypto_utils.cj",
       "mac.cj",
       "md.cj",
       "random.cj",
       "sym_key.cj",
       "sym_key_generator.cj",
+      "verify.cj",
     ]
   }
 

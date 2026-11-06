@@ -59,6 +59,12 @@ enum Result {
      *
      */
     ErrCryptoOperation
+    |
+    /**
+     * Indicates that the call is invalid.
+     *
+     */
+    ErrInvalidCall
     | ...
 
     /**
@@ -72,6 +78,7 @@ enum Result {
             case ErrOutOfMemory => 17620001
             case ErrRuntimeError => 17620002
             case ErrCryptoOperation => 17630001
+            case ErrInvalidCall => 17620004
             case _ => throw BusinessException(17620003, "Parameter check failed.")
         }
     }
@@ -87,6 +94,7 @@ enum Result {
             case ErrOutOfMemory => "Memory error."
             case ErrRuntimeError => "Runtime error."
             case ErrCryptoOperation => "Crypto operation error."
+            case ErrInvalidCall => "Invalid function call."
             case _ => throw BusinessException(17620003, "Parameter check failed.")
         }
     }
@@ -102,6 +110,7 @@ func getError(errCode: Int32): Result {
         case errCode == -20001 => return ErrOutOfMemory
         case errCode == -20002 => return ErrRuntimeError
         case errCode == -30001 => return ErrCryptoOperation
+        case errCode == -20004 => return ErrInvalidCall
         case _ => throw BusinessException(17620003, "Parameter check failed.")
     }
 }
